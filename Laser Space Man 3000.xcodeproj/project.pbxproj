@@ -17,6 +17,8 @@
 		20CF4FE81F2FE83700C6D5DA /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 20CF4FE61F2FE83700C6D5DA /* LaunchScreen.storyboard */; };
 		20CF4FF31F2FE83800C6D5DA /* Laser_Space_Man_3000Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20CF4FF21F2FE83800C6D5DA /* Laser_Space_Man_3000Tests.swift */; };
 		20CF4FFE1F2FE83800C6D5DA /* Laser_Space_Man_3000UITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20CF4FFD1F2FE83800C6D5DA /* Laser_Space_Man_3000UITests.swift */; };
+		20E125861F31437100D17028 /* GameOverScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20E125851F31437100D17028 /* GameOverScene.swift */; };
+		20E125881F31438A00D17028 /* MainMenuScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20E125871F31438A00D17028 /* MainMenuScene.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -53,6 +55,8 @@
 		20CF4FF91F2FE83800C6D5DA /* Laser Space Man 3000UITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Laser Space Man 3000UITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		20CF4FFD1F2FE83800C6D5DA /* Laser_Space_Man_3000UITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Laser_Space_Man_3000UITests.swift; sourceTree = "<group>"; };
 		20CF4FFF1F2FE83800C6D5DA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		20E125851F31437100D17028 /* GameOverScene.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameOverScene.swift; sourceTree = "<group>"; };
+		20E125871F31438A00D17028 /* MainMenuScene.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainMenuScene.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -110,7 +114,9 @@
 				20CF4FDF1F2FE83700C6D5DA /* GameViewController.swift */,
 				20CF4FE11F2FE83700C6D5DA /* Main.storyboard */,
 				20CF4FE41F2FE83700C6D5DA /* Assets.xcassets */,
+				20E125851F31437100D17028 /* GameOverScene.swift */,
 				20CF4FE61F2FE83700C6D5DA /* LaunchScreen.storyboard */,
+				20E125871F31438A00D17028 /* MainMenuScene.swift */,
 				20CF4FE91F2FE83700C6D5DA /* Info.plist */,
 			);
 			path = "Laser Space Man 3000";
@@ -270,8 +276,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				20E125881F31438A00D17028 /* MainMenuScene.swift in Sources */,
 				20CF4FDE1F2FE83700C6D5DA /* GameScene.swift in Sources */,
 				20CF4FE01F2FE83700C6D5DA /* GameViewController.swift in Sources */,
+				20E125861F31437100D17028 /* GameOverScene.swift in Sources */,
 				20CF4FD81F2FE83700C6D5DA /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -519,6 +527,7 @@
 				20CF50041F2FE83800C6D5DA /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		20CF50051F2FE83800C6D5DA /* Build configuration list for PBXNativeTarget "Laser Space Man 3000Tests" */ = {
 			isa = XCConfigurationList;
@@ -527,6 +536,7 @@
 				20CF50071F2FE83800C6D5DA /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		20CF50081F2FE83800C6D5DA /* Build configuration list for PBXNativeTarget "Laser Space Man 3000UITests" */ = {
 			isa = XCConfigurationList;
@@ -535,6 +545,7 @@
 				20CF500A1F2FE83800C6D5DA /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
