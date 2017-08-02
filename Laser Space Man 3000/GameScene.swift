@@ -9,7 +9,43 @@
 import SpriteKit
 import GameplayKit
 
-class GameScene: SKScene {
+struct PhysicsCategory {
+    static let None     : UInt32 = 0
+    static let All      : UInt32 = UInt32.max
+    static let Enemy    : UInt32 = 0b1
+    static let Bullet   : UInt32 = 0b10
+    static let Plauer   : UInt32 = 0b100
+}
+
+func + (left: CGPoint, right: CGPoint) -> CGPoint {
+    return CGPoint(x: left.x + right.x, y: left.y + right.y)
+}
+
+func - (left: CGPoint, right: CGPoint) -> CGPoint {
+    return CGPoint(x: left.x - right.x, y: left.y - right.y)
+}
+
+func * (point: CGPoint, scalar: CGFloat) -> CGPoint {
+    return CGPoint(x: point.x * scalar, y: point.y * scalar)
+}
+
+func / (point: CGPoint, scalar: CGFloat) -> CGPoint {
+    return CGPoint(x: point.x / scalar, y: point.y / scalar)
+}
+
+extension CGPoint {
+    func length() -> CGFloat {
+        return sqrt(x*x + y*y)
+    }
+    
+    func normalized() -> CGPoint {
+        return self / length()
+    }
+}
+
+
+
+class GameScene: SKScene, SKPhysicsContactDelegate {
     
     //let space = SKSpriteNode(imageNamed: "Space")
     let player = SKSpriteNode(imageNamed: "player")
@@ -27,11 +63,12 @@ class GameScene: SKScene {
         let width: Double = Double(size.width) * xScaler
         let height: Double = Double(size.height) * yScaler
         player.scale(to: CGSize(width: width, height: height))
-        //player.size = CGSize(width: size.width * 0.05, height: size.height * 0.08)
         self.addChild(player)
         addPlatform()
         
         physicsWorld.gravity = CGVector.zero
+        physicsWorld.contactDelegate = self
+        
         
         //let random = Double(arc4random_uniform(4)) + 1
         
@@ -86,8 +123,6 @@ class GameScene: SKScene {
         self.addChild(platform)
 
         let move = SKAction.moveTo(x: platform.position.x - size.width - CGFloat(width), duration: TimeInterval(5))
-       // move.timingMode = SKActionTimingMode.easeInEaseOut
-        //let move = SKAction.moveTo(y: 0, duration: TimeInterval(5))
         let moveDone = SKAction.removeFromParent()
         platform.run(SKAction.sequence([move, moveDone]))
     }
@@ -102,6 +137,9 @@ class GameScene: SKScene {
         let y: Double = (random/7)
         
         
+        
+        
+        
         // Position the enemy slightly off-screen along the right edge,
         // and along a random position along the Y axis as calculated above
         enemy.position = CGPoint(x: size.width*1.1, y: CGFloat(y)*size.height)
@@ -112,14 +150,75 @@ class GameScene: SKScene {
         
         self.addChild(enemy)
         
+        enemy.physicsBody = SKPhysicsBody(rectangleOf: enemy.size) // 1
+        enemy.physicsBody?.isDynamic = true // 2
+        enemy.physicsBody?.categoryBitMask = PhysicsCategory.Enemy // 3
+        enemy.physicsBody?.contactTestBitMask = PhysicsCategory.Bullet // 4
+        enemy.physicsBody?.collisionBitMask = PhysicsCategory.None // 5
         
-        let move = SKAction.move(to: CGPoint(x: 0, y: CGFloat(y)*size.height), duration: TimeInterval(5))
+        let move = SKAction.move(to: CGPoint(x: CGFloat(-width), y: CGFloat(y)*size.height), duration: TimeInterval(5))
         let moveDone = SKAction.removeFromParent()
         enemy.run(SKAction.sequence([move, moveDone]))
     }
     
     
-    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        
+        // 1 - Choose one of the touches to work with
+        guard let touch = touches.first else {
+            return
+        }
+        let touchLocation = touch.location(in: self)
+        
+        // 2 - Set up initial location of projectile
+        let bullet = SKSpriteNode(imageNamed: "bullet")
+        bullet.position.x = player.position.x + (size.width * CGFloat(xScaler))
+        bullet.position.y = player.position.y + (size.height * CGFloat(yScaler))/2
+        
+        // Make bullet appropiate size
+        let width: Double = Double(size.width) * xScaler
+        let height: Double = Double(size.height) * yScaler / 4
+        bullet.scale(to: CGSize(width: width, height: height))
+        
+        // 3 - Determine offset of location to projectile
+        let offset = touchLocation - bullet.position
+        
+        
+        
+        bullet.physicsBody = SKPhysicsBody(rectangleOf: bullet.size)
+        bullet.physicsBody?.isDynamic = true
+        bullet.physicsBody?.categoryBitMask = PhysicsCategory.Bullet
+        bullet.physicsBody?.contactTestBitMask = PhysicsCategory.Enemy
+        bullet.physicsBody?.collisionBitMask = PhysicsCategory.None
+        bullet.physicsBody?.usesPreciseCollisionDetection = true
+        
+        // 6 - Get the direction of where to shoot
+        let direction = offset.normalized()
+        
+        // 7 - Make it shoot far enough to be guaranteed off screen
+        let shootAmount = direction * size.width
+        
+        // 8 - Add the shoot amount to the current position
+        let destination = shootAmount + bullet.position
+        
+        // Rotate bullet so it's faces the proper direction
+        //let degrees = tan(Double(direction.y)/Double(direction.x))
+        //let rotation = SKAction.rotate(byAngle: CGFloat(degrees), duration: 0)
+        //bullet.run(rotation)
+        //bullet.zRotation += CGFloat(degrees * Double.pi / 180)
+        let angle = atan2(direction.y, direction.x)
+        bullet.zRotation += angle
+        //bullet.zRotation = angle - CGFloat(Double.pi/2)
+        
+        addChild(bullet)
+        
+        // 9 - Create the actions
+        let actionMove = SKAction.move(to: destination, duration: 2.0)
+        let actionMoveDone = SKAction.removeFromParent()
+        bullet.run(SKAction.sequence([actionMove, actionMoveDone]))
+        
+    }
+
 /*
     
     func touchDown(atPoint pos : CGPoint) {
@@ -171,4 +270,33 @@ class GameScene: SKScene {
         // Called before each frame is rendered
     }
  */
+    func projectileDidCollideWithMonster(projectile: SKSpriteNode, monster: SKSpriteNode) {
+        print("Hit")
+        projectile.removeFromParent()
+        monster.removeFromParent()
+    }
+    
+    func didBegin(_ contact: SKPhysicsContact) {
+        
+        // Sort by category bitmask
+        var firstBody: SKPhysicsBody
+        var secondBody: SKPhysicsBody
+        if contact.bodyA.categoryBitMask < contact.bodyB.categoryBitMask {
+            firstBody = contact.bodyA
+            secondBody = contact.bodyB
+        } else {
+            firstBody = contact.bodyB
+            secondBody = contact.bodyA
+        }
+        
+        // Check if enemy & bullet collide
+        if ((firstBody.categoryBitMask & PhysicsCategory.Enemy != 0) &&
+            (secondBody.categoryBitMask & PhysicsCategory.Bullet != 0)) {
+            if let monster = firstBody.node as? SKSpriteNode, let
+                projectile = secondBody.node as? SKSpriteNode {
+                projectileDidCollideWithMonster(projectile: projectile, monster: monster)
+            }
+        }
+        
+    }
 }
