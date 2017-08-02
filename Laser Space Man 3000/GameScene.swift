@@ -105,7 +105,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     func addPlatform() {
         
-        
         let platformNumber: Double = Double(arc4random_uniform(5)) + 1
         let height: Double = platformNumber / 7 * Double(size.height)
         let randomLength: Double = Double(arc4random_uniform(10)) + 1
@@ -150,7 +149,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         self.addChild(enemy)
         
-        enemy.physicsBody = SKPhysicsBody(rectangleOf: enemy.size) // 1
+        enemy.physicsBody = SKPhysicsBody(rectangleOf: enemy.size, center: CGPoint(x: width/2, y: height/2)) // 1
         enemy.physicsBody?.isDynamic = true // 2
         enemy.physicsBody?.categoryBitMask = PhysicsCategory.Enemy // 3
         enemy.physicsBody?.contactTestBitMask = PhysicsCategory.Bullet // 4
@@ -158,7 +157,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         let move = SKAction.move(to: CGPoint(x: CGFloat(-width), y: CGFloat(y)*size.height), duration: TimeInterval(5))
         let moveDone = SKAction.removeFromParent()
-        enemy.run(SKAction.sequence([move, moveDone]))
+        let loseAction = SKAction.run() {
+            let reveal = SKTransition.flipHorizontal(withDuration: 0.5)
+            let gameOverScene = GameOverScene(size: self.size)
+            self.view?.presentScene(gameOverScene, transition: reveal)
+        }
+        enemy.run(SKAction.sequence([move, loseAction, moveDone]))
     }
     
     
