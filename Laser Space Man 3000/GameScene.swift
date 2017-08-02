@@ -14,7 +14,7 @@ struct PhysicsCategory {
     static let All      : UInt32 = UInt32.max
     static let Enemy    : UInt32 = 0b1
     static let Bullet   : UInt32 = 0b10
-    static let Plauer   : UInt32 = 0b100
+    static let Player   : UInt32 = 0b100
 }
 
 func + (left: CGPoint, right: CGPoint) -> CGPoint {
@@ -47,38 +47,47 @@ extension CGPoint {
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
     
-    //let space = SKSpriteNode(imageNamed: "Space")
     let player = SKSpriteNode(imageNamed: "player")
+    var pauseButton = SKShapeNode()
+    var pauseLabel = SKLabelNode()
     let xScaler: Double = 0.05
     let yScaler: Double = 0.08
+    let platformAndEnemySpeed = 200
+    let teleportSpeed = 400
+    var enemiesKilled : Int = 0
+    var spriteView = SKView()
+    struct PlatformStruct {
+        let platform : SKShapeNode
+        let length : Double
+        let height : Double
+    }
+    var platforms: [PlatformStruct] = []
     
     override func didMove(to view: SKView) {
         
-        //space.position = CGPoint(x: frame.size.width / 2, y: frame.size.height / 2)
         backgroundColor = SKColor.white
-        
+        self.scaleMode = SKSceneScaleMode.resizeFill
+        spriteView = self.view!
         player.anchorPoint = CGPoint(x: 0, y: 0)
         player.position = CGPoint(x: size.width * 0.1, y: size.height * 3 / 7)
         
         let width: Double = Double(size.width) * xScaler
         let height: Double = Double(size.height) * yScaler
         player.scale(to: CGSize(width: width, height: height))
-        self.addChild(player)
-        addPlatform()
+        addChild(player)
+        
+        player.physicsBody = SKPhysicsBody(rectangleOf: player.size, center: CGPoint(x: width/2, y: height/2)) // 1
+        player.physicsBody?.isDynamic = true // 2
+        player.physicsBody?.categoryBitMask = PhysicsCategory.Player // 3
+        player.physicsBody?.contactTestBitMask = PhysicsCategory.Enemy // 4
+        player.physicsBody?.collisionBitMask = PhysicsCategory.None // 5
+        
         
         physicsWorld.gravity = CGVector.zero
         physicsWorld.contactDelegate = self
         
-        
-        //let random = Double(arc4random_uniform(4)) + 1
-        
-        run(SKAction.repeatForever(
-            SKAction.sequence([
-                SKAction.run(addPlatform),
-                SKAction.run(addEnemy),
-                SKAction.wait(forDuration: 1)
-                ])
-        ))
+        makePauseButton()
+        run(SKAction.repeatForever(SKAction.sequence([SKAction.run(addPlatform), SKAction.run(jumpUp), SKAction.wait(forDuration: 2)])))
         
         /*
         // Get label node from scene and store it for use later
@@ -107,55 +116,44 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         let platformNumber: Double = Double(arc4random_uniform(5)) + 1
         let height: Double = platformNumber / 7 * Double(size.height)
-        let randomLength: Double = Double(arc4random_uniform(10)) + 1
+        let randomLength: Double = Double(arc4random_uniform(9)) + 2
         let width: Double = randomLength * Double(size.width) / 10
+        //let path: CGMutablePath = CGMutablePath()
+        
+        
         let startPoint: CGPoint = CGPoint(x: Double(size.width), y: height)
         let endPoint: CGPoint = CGPoint(x: Double(size.width) + width, y: height)
         let path: CGMutablePath = CGMutablePath()
         path.move(to: startPoint)
         path.addLine(to: endPoint)
+ 
         
         let platform = SKShapeNode()
+        self.addChild(platform)
+        print("Platform added. origin is ", platform.frame.origin, " position is ", platform.position, " parent is ", platform.parent!, "\n")
         platform.path = path
         platform.strokeColor = UIColor.black
         platform.lineWidth = 2
-        self.addChild(platform)
-
-        let move = SKAction.moveTo(x: platform.position.x - size.width - CGFloat(width), duration: TimeInterval(5))
-        let moveDone = SKAction.removeFromParent()
-        platform.run(SKAction.sequence([move, moveDone]))
-    }
- 
-    func addEnemy() {
+        //platform.frame
+        //addChild(platform)
+        platforms.append(PlatformStruct(platform: platform, length: width, height: height))
         
-        // Create enemy
-        let enemy = SKSpriteNode(imageNamed: "enemy")
-        
-        // Determine what line to spawn enemy on (random # 1-5 out of 7)
-        let random: Double = Double(arc4random_uniform(5)) + 1
-        let y: Double = (random/7)
-        
+        let enemyRate = 2;
+        for i in 2...Int(randomLength) {
+            let randomEnemyNumber = Double(arc4random_uniform(UInt32(enemyRate)))
+            //For each segment of platform, "1 in enemyRate" chance enemy spawned there
+            if (randomEnemyNumber == 0) {
+                let point: CGPoint = CGPoint(x: (Double(i)*Double(size.width)/10 + Double(size.width)) - (Double(size.width) * xScaler), y: height)
+                addEnemy(platform: platform, point: point)
+            }
+            
+        }
         
         
         
         
-        // Position the enemy slightly off-screen along the right edge,
-        // and along a random position along the Y axis as calculated above
-        enemy.position = CGPoint(x: size.width*1.1, y: CGFloat(y)*size.height)
-        enemy.anchorPoint = CGPoint(x: 0, y: 0)
-        let width: Double = Double(size.width) * xScaler
-        let height: Double = Double(size.height) * yScaler
-        enemy.scale(to: CGSize(width: width, height: height))
-        
-        self.addChild(enemy)
-        
-        enemy.physicsBody = SKPhysicsBody(rectangleOf: enemy.size, center: CGPoint(x: width/2, y: height/2)) // 1
-        enemy.physicsBody?.isDynamic = true // 2
-        enemy.physicsBody?.categoryBitMask = PhysicsCategory.Enemy // 3
-        enemy.physicsBody?.contactTestBitMask = PhysicsCategory.Bullet // 4
-        enemy.physicsBody?.collisionBitMask = PhysicsCategory.None // 5
-        
-        let move = SKAction.move(to: CGPoint(x: CGFloat(-width), y: CGFloat(y)*size.height), duration: TimeInterval(5))
+        /*let time = (Double(point.x) + width) / Double(platformAndEnemySpeed)
+        let move = SKAction.move(to: CGPoint(x: CGFloat(-width), y: point.y), duration: TimeInterval(time))
         let moveDone = SKAction.removeFromParent()
         let loseAction = SKAction.run() {
             let reveal = SKTransition.flipHorizontal(withDuration: 0.5)
@@ -163,6 +161,56 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             self.view?.presentScene(gameOverScene, transition: reveal)
         }
         enemy.run(SKAction.sequence([move, loseAction, moveDone]))
+        */
+        
+        let time = (Double(startPoint.x) + width) / Double(platformAndEnemySpeed)
+        let move = SKAction.moveTo(x: platform.position.x - size.width - CGFloat(width), duration: TimeInterval(time))
+        
+        let moveDone = SKAction.removeFromParent()
+        platform.run(SKAction.sequence([move, SKAction.run(
+            {
+                //let length = self.platforms.count - 1
+                var flag : Bool = true
+                var index : Int = 0
+                while flag {
+                    if self.platforms[index].platform.hashValue == platform.hashValue {
+                        print("found it")
+                        flag = false
+                        self.platforms.remove(at: index)
+                    }
+                    index += 1
+                }
+            }
+            ), moveDone]))
+        
+        
+        
+        
+        
+        
+        
+        // let index = platforms.index(of: platform)
+        //platforms.remove(at: index!)
+    }
+ 
+    /*  Enemy will be child of the platform that calls it.
+        Enemy will be spawned at given CGPoint. */
+    func addEnemy(platform: SKShapeNode, point : CGPoint) {
+    
+        let enemy = SKSpriteNode(imageNamed: "enemy")
+        enemy.position = point
+        enemy.anchorPoint = CGPoint(x: 0, y: 0)
+        let width: Double = Double(size.width) * xScaler
+        let height: Double = Double(size.height) * yScaler
+        enemy.scale(to: CGSize(width: width, height: height))
+        
+        platform.addChild(enemy)
+        
+        enemy.physicsBody = SKPhysicsBody(rectangleOf: enemy.size, center: CGPoint(x: width/2, y: height/2))
+        enemy.physicsBody?.isDynamic = true
+        enemy.physicsBody?.categoryBitMask = PhysicsCategory.Enemy
+        enemy.physicsBody?.contactTestBitMask = PhysicsCategory.Bullet
+        enemy.physicsBody?.collisionBitMask = PhysicsCategory.None
     }
     
     
@@ -174,6 +222,17 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
         let touchLocation = touch.location(in: self)
         
+        
+        
+        let node = self.atPoint(touchLocation)
+        if node == pauseButton {
+            pauseButtonHit()
+            return
+        }
+        if self.speed == 0 {
+            return
+        }
+    
         // 2 - Set up initial location of projectile
         let bullet = SKSpriteNode(imageNamed: "bullet")
         bullet.position.x = player.position.x + (size.width * CGFloat(xScaler))
@@ -215,6 +274,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         //bullet.zRotation = angle - CGFloat(Double.pi/2)
         
         addChild(bullet)
+        
+        /*for item in platforms {
+            print("platform hash value: ", item.platform.hashValue, "platform position: ", item.platform.position, " platform length: ", item.length, " player's position: ", player.position)
+        }*/
         
         // 9 - Create the actions
         let actionMove = SKAction.move(to: destination, duration: 2.0)
@@ -274,12 +337,106 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // Called before each frame is rendered
     }
  */
-    func projectileDidCollideWithMonster(projectile: SKSpriteNode, monster: SKSpriteNode) {
+    func bulletDidCollideWithMonster(bullet: SKSpriteNode, enemy: SKSpriteNode) {
         print("Hit")
-        projectile.removeFromParent()
-        monster.removeFromParent()
+        enemiesKilled += 1
+        bullet.removeFromParent()
+        enemy.removeFromParent()
     }
     
+    func gameOver() {
+        let reveal = SKTransition.flipHorizontal(withDuration: 0.5)
+        let gameOverScene = GameOverScene(size: self.size)
+        self.view?.presentScene(gameOverScene, transition: reveal)
+    }
+    
+    func makePauseButton() {
+        pauseLabel = SKLabelNode(fontNamed: "Fipps-Regular")
+        pauseLabel.text = "Pause"
+        pauseLabel.fontSize = 10
+        pauseLabel.fontColor = SKColor.blue
+        pauseLabel.position = CGPoint(x: size.width*7/100, y: size.height*5/100)
+        addChild(pauseLabel)
+        
+        
+        // Try as a shape
+        let path = CGRect.init(x: Double(size.width*2/100), y: Double(size.height*35/1000), width: Double(size.width*10/100), height: Double(size.height*7/100))
+        pauseButton = SKShapeNode.init(rect: path, cornerRadius: 5)
+        pauseButton.strokeColor = UIColor.black
+        addChild(pauseButton)
+    }
+    
+    func pauseButtonHit() {
+        if self.speed == 1 {
+            self.speed = 0
+            pauseLabel.text = "Resume"
+            return
+        }
+        pauseLabel.text = "Pause"
+        self.speed = 1
+        return
+        
+        /*let message = "Pause"
+        let label = SKLabelNode(fontNamed: "Fipps-Regular")
+        label.text = message
+        label.fontSize = 10
+        label.fontColor = SKColor.blue
+        label.position = CGPoint(x: size.width*7/100, y: size.height*5/100)
+        addChild(label)*/
+    }
+    /*
+    func teleportRight() {
+        
+    }
+    
+    func teleportLeft() {
+        
+    }
+    */
+    func jumpUp() {
+        //If no platforms possibly above, do nothing & return
+        if Double(player.position.y) >= 5 / 7 * Double(size.height) {
+            return
+        }
+        
+        var lowestYAbove : CGFloat = size.height
+        
+        for platformStruct in platforms {
+            //If platform above player
+            if (CGFloat(platformStruct.height) > player.position.y) {
+                
+                
+                //let convertedPosition = platformStruct.platform.scene?.convert(platformStruct.platform.position,
+                                                                               //from: platformStruct.platform.parent!)
+                
+                //print("platform hash value: ", platformStruct.platform.hashValue, "platform position: ", platformStruct.platform.position, " platform length: ", platformStruct.length, " platform height: ", platformStruct.height)
+                
+                
+                
+                //If player is within the platforms x span
+                if ((size.width + platformStruct.platform.position.x) < (player.position.x + size.width * CGFloat(xScaler))) &&
+                    ((size.width + platformStruct.platform.position.x + platformStruct.platform.lineLength) > (player.position.x)) {
+                    
+                    //If platform is the next lowest platform above, update lowestYAbove
+                    if CGFloat(platformStruct.height) < lowestYAbove {
+                            lowestYAbove = CGFloat(platformStruct.height)
+                    }
+                }
+            }
+        }
+ 
+        if lowestYAbove < size.height {
+            let time = (Double(lowestYAbove - player.position.y)) / Double(teleportSpeed)
+            player.run(SKAction.moveTo(y: lowestYAbove, duration: time))
+        }
+        
+    }
+ 
+    /*
+    func teleportDown() {
+        
+    }
+    */
     func didBegin(_ contact: SKPhysicsContact) {
         
         // Sort by category bitmask
@@ -296,10 +453,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // Check if enemy & bullet collide
         if ((firstBody.categoryBitMask & PhysicsCategory.Enemy != 0) &&
             (secondBody.categoryBitMask & PhysicsCategory.Bullet != 0)) {
-            if let monster = firstBody.node as? SKSpriteNode, let
-                projectile = secondBody.node as? SKSpriteNode {
-                projectileDidCollideWithMonster(projectile: projectile, monster: monster)
+            if let enemy = firstBody.node as? SKSpriteNode, let
+                bullet = secondBody.node as? SKSpriteNode {
+                bulletDidCollideWithMonster(bullet: bullet, enemy: enemy)
             }
+        }
+        // Player is 2nd body
+        // Check if enemy & player collide
+        if ((firstBody.categoryBitMask & PhysicsCategory.Enemy != 0) &&
+            (secondBody.categoryBitMask & PhysicsCategory.Player != 0)) {
+                gameOver()
         }
         
     }
