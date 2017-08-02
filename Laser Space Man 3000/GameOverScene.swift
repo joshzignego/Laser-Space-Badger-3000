@@ -41,7 +41,7 @@ class GameOverScene: SKScene {
         let label = SKLabelNode(fontNamed: "Fipps-Regular")
         label.text = message
         label.fontSize = 60
-        label.fontColor = SKColor.blue
+        label.fontColor = SKColor.red
         label.position = CGPoint(x: size.width/2, y: size.height*66/100)
         self.addChild(label)
         
