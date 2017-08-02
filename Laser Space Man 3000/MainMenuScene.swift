@@ -9,7 +9,7 @@
 import Foundation
 import SpriteKit
 
-class MainMenu: SKScene {
+class MainMenuScene: SKScene {
     
     var playButton = SKSpriteNode()
     let playButtonText = SKTexture(imageNamed: "PlayButton")
@@ -18,6 +18,9 @@ class MainMenu: SKScene {
         
         playButton = SKSpriteNode(texture: playButtonText)
         playButton.position = CGPoint(x: frame.midX, y: frame.midY)
+        let width: Double = Double(size.width) * 0.25
+        let height: Double = Double(size.height) * 0.25
+        playButton.scale(to: CGSize(width: width, height: height))
         self.addChild(playButton)
     }
     
