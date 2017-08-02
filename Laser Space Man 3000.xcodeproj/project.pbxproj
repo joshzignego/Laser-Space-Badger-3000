@@ -19,6 +19,7 @@
 		20CF4FFE1F2FE83800C6D5DA /* Laser_Space_Man_3000UITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20CF4FFD1F2FE83800C6D5DA /* Laser_Space_Man_3000UITests.swift */; };
 		20E125861F31437100D17028 /* GameOverScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20E125851F31437100D17028 /* GameOverScene.swift */; };
 		20E125881F31438A00D17028 /* MainMenuScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20E125871F31438A00D17028 /* MainMenuScene.swift */; };
+		20E125941F31ABCF00D17028 /* Fipps-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 20E125911F31AAE700D17028 /* Fipps-Regular.otf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -57,6 +58,7 @@
 		20CF4FFF1F2FE83800C6D5DA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		20E125851F31437100D17028 /* GameOverScene.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameOverScene.swift; sourceTree = "<group>"; };
 		20E125871F31438A00D17028 /* MainMenuScene.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainMenuScene.swift; sourceTree = "<group>"; };
+		20E125911F31AAE700D17028 /* Fipps-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Fipps-Regular.otf"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -87,6 +89,7 @@
 		20CF4FCB1F2FE83700C6D5DA = {
 			isa = PBXGroup;
 			children = (
+				20E125901F31AAD700D17028 /* Resources */,
 				20CF4FD61F2FE83700C6D5DA /* Laser Space Man 3000 */,
 				20CF4FF11F2FE83800C6D5DA /* Laser Space Man 3000Tests */,
 				20CF4FFC1F2FE83800C6D5DA /* Laser Space Man 3000UITests */,
@@ -138,6 +141,14 @@
 				20CF4FFF1F2FE83800C6D5DA /* Info.plist */,
 			);
 			path = "Laser Space Man 3000UITests";
+			sourceTree = "<group>";
+		};
+		20E125901F31AAD700D17028 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				20E125911F31AAE700D17028 /* Fipps-Regular.otf */,
+			);
+			name = Resources;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -247,6 +258,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				20E125941F31ABCF00D17028 /* Fipps-Regular.otf in Resources */,
 				20CF4FE31F2FE83700C6D5DA /* Main.storyboard in Resources */,
 				20CF4FDA1F2FE83700C6D5DA /* GameScene.sks in Resources */,
 				20CF4FE51F2FE83700C6D5DA /* Assets.xcassets in Resources */,
