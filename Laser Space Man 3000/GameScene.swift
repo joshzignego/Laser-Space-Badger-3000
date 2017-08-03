@@ -65,6 +65,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     override func didMove(to view: SKView) {
         
+        self.name = "GameScene"
         backgroundColor = SKColor.white
         self.scaleMode = SKSceneScaleMode.resizeFill
         spriteView = self.view!
@@ -75,6 +76,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let height: Double = Double(size.height) * yScaler
         player.scale(to: CGSize(width: width, height: height))
         addChild(player)
+        print("Player added. origin is ", player.frame.origin, " position is ", player.position, " parent is ", player.parent!, "\n")
         
         player.physicsBody = SKPhysicsBody(rectangleOf: player.size, center: CGPoint(x: width/2, y: height/2)) // 1
         player.physicsBody?.isDynamic = true // 2
@@ -87,7 +89,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         physicsWorld.contactDelegate = self
         
         makePauseButton()
-        run(SKAction.repeatForever(SKAction.sequence([SKAction.run(addPlatform), SKAction.run(jumpUp), SKAction.wait(forDuration: 2)])))
+        run(SKAction.repeatForever(SKAction.sequence([SKAction.run(addPlatform), SKAction.run(jumpUp), SKAction.wait(forDuration: 1), SKAction.run(jumpDown), SKAction.wait(forDuration: 1)])))
         
         /*
         // Get label node from scene and store it for use later
@@ -121,21 +123,20 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         //let path: CGMutablePath = CGMutablePath()
         
         
-        let startPoint: CGPoint = CGPoint(x: Double(size.width), y: height)
-        let endPoint: CGPoint = CGPoint(x: Double(size.width) + width, y: height)
+        let startPoint: CGPoint = CGPoint(x: 0, y: 0)
+        let endPoint: CGPoint = CGPoint(x: width, y: 0)
         let path: CGMutablePath = CGMutablePath()
         path.move(to: startPoint)
         path.addLine(to: endPoint)
  
         
         let platform = SKShapeNode()
-        self.addChild(platform)
-        print("Platform added. origin is ", platform.frame.origin, " position is ", platform.position, " parent is ", platform.parent!, "\n")
+        platform.position = CGPoint(x: size.width, y: CGFloat(height))
         platform.path = path
         platform.strokeColor = UIColor.black
         platform.lineWidth = 2
-        //platform.frame
-        //addChild(platform)
+        addChild(platform)
+        print("Platform added. origin is ", platform.frame.origin, " position is ", platform.position, " parent is ", platform.parent!, "\n")
         platforms.append(PlatformStruct(platform: platform, length: width, height: height))
         
         let enemyRate = 2;
@@ -143,7 +144,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             let randomEnemyNumber = Double(arc4random_uniform(UInt32(enemyRate)))
             //For each segment of platform, "1 in enemyRate" chance enemy spawned there
             if (randomEnemyNumber == 0) {
-                let point: CGPoint = CGPoint(x: (Double(i)*Double(size.width)/10 + Double(size.width)) - (Double(size.width) * xScaler), y: height)
+                let point: CGPoint = CGPoint(x: Double(i)*Double(size.width)/10 - (Double(size.width) * xScaler), y: 0)
                 addEnemy(platform: platform, point: point)
             }
             
@@ -163,10 +164,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         enemy.run(SKAction.sequence([move, loseAction, moveDone]))
         */
         
-        let time = (Double(startPoint.x) + width) / Double(platformAndEnemySpeed)
-        let move = SKAction.moveTo(x: platform.position.x - size.width - CGFloat(width), duration: TimeInterval(time))
-        
+        let time = (Double(size.width) + width) / Double(platformAndEnemySpeed)
+        let move = SKAction.moveTo(x: -CGFloat(width), duration: TimeInterval(time))
         let moveDone = SKAction.removeFromParent()
+        
         platform.run(SKAction.sequence([move, SKAction.run(
             {
                 //let length = self.platforms.count - 1
@@ -403,7 +404,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         for platformStruct in platforms {
             //If platform above player
-            if (CGFloat(platformStruct.height) > player.position.y) {
+            if (CGFloat(platformStruct.platform.position.y) > player.position.y) {
                 
                 
                 //let convertedPosition = platformStruct.platform.scene?.convert(platformStruct.platform.position,
@@ -414,8 +415,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 
                 
                 //If player is within the platforms x span
-                if ((size.width + platformStruct.platform.position.x) < (player.position.x + size.width * CGFloat(xScaler))) &&
-                    ((size.width + platformStruct.platform.position.x + platformStruct.platform.lineLength) > (player.position.x)) {
+                if ((platformStruct.platform.position.x) < (player.position.x + size.width * CGFloat(xScaler))) &&
+                    ((Double(platformStruct.platform.position.x) + platformStruct.length) > Double(player.position.x)) {
                     
                     //If platform is the next lowest platform above, update lowestYAbove
                     if CGFloat(platformStruct.height) < lowestYAbove {
@@ -432,11 +433,38 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
     }
  
-    /*
-    func teleportDown() {
+    
+    func jumpDown() {
+        //If no platforms possibly below, do nothing & return
+        if Double(player.position.y) <= 1 / 7 * Double(size.height) {
+            return
+        }
         
+        var highestYBelow : CGFloat = 0
+        
+        for platformStruct in platforms {
+            //If platform below player
+            if (CGFloat(platformStruct.platform.position.y) < player.position.y) {
+                
+                //If player is within the platforms x span
+                if ((platformStruct.platform.position.x) < (player.position.x + size.width * CGFloat(xScaler))) &&
+                    ((Double(platformStruct.platform.position.x) + platformStruct.length) > Double(player.position.x)) {
+                    
+                    //If platform is the next lowest platform above, update lowestYAbove
+                    if CGFloat(platformStruct.height) > highestYBelow {
+                        highestYBelow = CGFloat(platformStruct.height)
+                    }
+                }
+            }
+        }
+        
+        if highestYBelow > 0 {
+            let time = (Double(player.position.y) - Double(highestYBelow)) / Double(teleportSpeed)
+            player.run(SKAction.moveTo(y: highestYBelow, duration: time))
+        }
+
     }
-    */
+    
     func didBegin(_ contact: SKPhysicsContact) {
         
         // Sort by category bitmask
