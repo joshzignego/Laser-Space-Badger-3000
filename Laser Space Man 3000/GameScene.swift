@@ -49,14 +49,19 @@ extension CGPoint {
 class GameScene: SKScene, SKPhysicsContactDelegate {
     
     let player = SKSpriteNode(imageNamed: "player")
+    let enemiesCanStillTakeHitsFromIcon = SKSpriteNode(imageNamed: "enemy")
     var invisiwall = SKShapeNode()
     var pauseButton = SKShapeNode()
     var pauseLabel = SKLabelNode()
+    var scoreLabel = SKLabelNode()
+    var enemiesCanStillTakeHitsFromLabel = SKLabelNode()
     let xScaler: Double = 0.05
     let yScaler: Double = 0.08
+    var score: Int = 0
     let platformAndEnemySpeed = 200
     let teleportSpeed = 400
     let enemiesPassedToDie = 30
+    var enemiesCanStillTakeHitsFrom: Int = 0
     var enemiesKilled : Int = 0
     var enemiesPassed : Int = 0
     var spriteView = SKView()
@@ -78,17 +83,23 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     override func didMove(to view: SKView) {
         
         self.name = "GameScene"
+        enemiesCanStillTakeHitsFrom = enemiesPassedToDie
         teleportDistance = Double(size.width) * 0.10
         backgroundColor = SKColor.white
         self.scaleMode = SKSceneScaleMode.resizeFill
         spriteView = self.view!
+        
+        enemiesCanStillTakeHitsFromIcon.anchorPoint = CGPoint(x: 0, y: 0)
+        enemiesCanStillTakeHitsFromIcon.position = CGPoint(x: size.width * 0.05, y: size.height * 0.88)
         player.anchorPoint = CGPoint(x: 0, y: 0)
         player.position = CGPoint(x: size.width * 0.1, y: size.height * 3 / 7)
         
         let width: Double = Double(size.width) * xScaler
         let height: Double = Double(size.height) * yScaler
+        enemiesCanStillTakeHitsFromIcon.scale(to: CGSize(width: width, height: height))
         player.scale(to: CGSize(width: width, height: height))
         addChild(player)
+        addChild(enemiesCanStillTakeHitsFromIcon)
         //print("Player added. origin is ", player.frame.origin, " position is ", player.position, " parent is ", player.parent!, "\n")
         
         player.physicsBody = SKPhysicsBody(rectangleOf: player.size, center: CGPoint(x: width/2, y: height/2))
@@ -132,35 +143,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         physicsWorld.contactDelegate = self
         
         makePauseButton()
+        makeScoreLabel()
+        makeEnemiesCanStillTakeHitsFromLabel()
         
         /* Teleport/Jump tester
         run(SKAction.repeatForever(SKAction.sequence([SKAction.run(addPlatform), SKAction.run(jumpUp), SKAction.wait(forDuration: 1), SKAction.run(teleportRight), SKAction.wait(forDuration: 1), SKAction.run(teleportLeft), SKAction.wait(forDuration: 1), SKAction.run(jumpDown), SKAction.wait(forDuration: 1)])))
         */
+        
         run(SKAction.repeatForever(SKAction.sequence([SKAction.run(addPlatform), SKAction.wait(forDuration: 1)])))
-        
-        
-        /*
-        // Get label node from scene and store it for use later
-        self.label = self.childNode(withName: "//helloLabel") as? SKLabelNode
-        if let label = self.label {
-            label.alpha = 0.0
-            label.run(SKAction.fadeIn(withDuration: 2.0))
-        }
-        
-        // Create shape node to use during mouse interaction
-        let w = (self.size.width + self.size.height) * 0.05
-        self.spinnyNode = SKShapeNode.init(rectOf: CGSize.init(width: w, height: w), cornerRadius: w * 0.3)
-        
-        if let spinnyNode = self.spinnyNode {
-            spinnyNode.lineWidth = 2.5
-            
-            spinnyNode.run(SKAction.repeatForever(SKAction.rotate(byAngle: CGFloat(Double.pi), duration: 1)))
-            spinnyNode.run(SKAction.sequence([SKAction.wait(forDuration: 0.5),
-                                              SKAction.fadeOut(withDuration: 0.5),
-                                              SKAction.removeFromParent()]))
-        }
-        */
     }
+    
     
     func addPlatform() {
         
@@ -354,67 +346,20 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         //print("Down")
         jumpDown()
     }
-/*
-    
-    func touchDown(atPoint pos : CGPoint) {
-        if let n = self.spinnyNode?.copy() as! SKShapeNode? {
-            n.position = pos
-            n.strokeColor = SKColor.green
-            self.addChild(n)
-        }
-    }
-    
-    func touchMoved(toPoint pos : CGPoint) {
-        if let n = self.spinnyNode?.copy() as! SKShapeNode? {
-            n.position = pos
-            n.strokeColor = SKColor.blue
-            self.addChild(n)
-        }
-    }
-    
-    func touchUp(atPoint pos : CGPoint) {
-        if let n = self.spinnyNode?.copy() as! SKShapeNode? {
-            n.position = pos
-            n.strokeColor = SKColor.red
-            self.addChild(n)
-        }
-    }
-    
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        if let label = self.label {
-            label.run(SKAction.init(named: "Pulse")!, withKey: "fadeInOut")
-        }
-        
-        for t in touches { self.touchDown(atPoint: t.location(in: self)) }
-    }
-    
-    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for t in touches { self.touchMoved(toPoint: t.location(in: self)) }
-    }
-    
-    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for t in touches { self.touchUp(atPoint: t.location(in: self)) }
-    }
-    
-    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for t in touches { self.touchUp(atPoint: t.location(in: self)) }
-    }
-    
-    
-    override func update(_ currentTime: TimeInterval) {
-        // Called before each frame is rendered
-    }
- */
-    func bulletDidCollideWithMonster(bullet: SKSpriteNode, enemy: SKSpriteNode) {
+
+    func bulletDidCollideWithEnemy(bullet: SKSpriteNode, enemy: SKSpriteNode) {
         //print("Hit")
         enemiesKilled += 1
+        score += 1
+        updateScore()
         bullet.removeFromParent()
         enemy.removeFromParent()
     }
     
     func enemyCollideWithInvisiwall() {
-        enemiesPassed += 1
-        if enemiesPassed >= enemiesPassedToDie {
+        enemiesCanStillTakeHitsFrom -= 1
+        updateEnemiesCanStillTakeHitsFromLabel()
+        if enemiesCanStillTakeHitsFrom <= 0 {
             gameOver()
         }
     }
@@ -423,6 +368,32 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let reveal = SKTransition.flipHorizontal(withDuration: 0.5)
         let gameOverScene = GameOverScene(size: self.size)
         self.view?.presentScene(gameOverScene, transition: reveal)
+    }
+    
+    func makeEnemiesCanStillTakeHitsFromLabel() {
+        enemiesCanStillTakeHitsFromLabel = SKLabelNode(fontNamed: "Fipps-Regular")
+        enemiesCanStillTakeHitsFromLabel.text = String(enemiesCanStillTakeHitsFrom)
+        enemiesCanStillTakeHitsFromLabel.fontSize = 25
+        enemiesCanStillTakeHitsFromLabel.fontColor = SKColor.red
+        enemiesCanStillTakeHitsFromLabel.position = CGPoint(x: size.width*15/100, y: size.height*88/100)
+        addChild(enemiesCanStillTakeHitsFromLabel)
+    }
+    
+    func makeScoreLabel() {
+        scoreLabel = SKLabelNode(fontNamed: "Fipps-Regular")
+        scoreLabel.text = String(score)
+        scoreLabel.fontSize = 25
+        scoreLabel.fontColor = SKColor.yellow
+        scoreLabel.position = CGPoint(x: size.width*93/100, y: size.height*88/100)
+        addChild(scoreLabel)
+    }
+    
+    func updateEnemiesCanStillTakeHitsFromLabel() {
+        enemiesCanStillTakeHitsFromLabel.text = String(enemiesCanStillTakeHitsFrom)
+    }
+    
+    func updateScore() {
+        scoreLabel.text = String(score)
     }
     
     func makePauseButton() {
@@ -591,7 +562,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             (secondBody.categoryBitMask & PhysicsCategory.Bullet != 0)) {
             if let enemy = firstBody.node as? SKSpriteNode, let
                 bullet = secondBody.node as? SKSpriteNode {
-                bulletDidCollideWithMonster(bullet: bullet, enemy: enemy)
+                bulletDidCollideWithEnemy(bullet: bullet, enemy: enemy)
             }
         }
         // Player is 2nd body
