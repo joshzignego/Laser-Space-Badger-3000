@@ -11,7 +11,7 @@ import SpriteKit
 
 class MainMenuScene: SKScene {
     
-    //var playButton = SKSpriteNode()
+    var hsButton = SKShapeNode()
     var playButtonDoneAsAShape = SKShapeNode()
     //let playButtonText = SKTexture(imageNamed: "PlayButton")
     
@@ -28,12 +28,24 @@ class MainMenuScene: SKScene {
         label.position = CGPoint(x: size.width/2, y: size.height*32/100)
         addChild(label)
         
+        let message2 = "High Scores"
+        let label2 = SKLabelNode(fontNamed: "Fipps-Regular")
+        label2.text = message2
+        label2.fontSize = 40
+        label2.fontColor = SKColor.blue
+        label2.position = CGPoint(x: size.width/2, y: size.height*5/100)
+        addChild(label2)
         
         // Try as a shape
         let path = CGRect.init(x: Double(size.width/4), y: Double(size.height*1/4), width: Double(size.width/2), height: Double(size.height/4))
         playButtonDoneAsAShape = SKShapeNode.init(rect: path, cornerRadius: 10)
         playButtonDoneAsAShape.strokeColor = UIColor.black
         addChild(playButtonDoneAsAShape)
+        
+        let path2 = CGRect.init(x: Double(size.width/4), y: Double(1), width: Double(size.width/2), height: Double(size.height/4))
+        hsButton = SKShapeNode.init(rect: path2, cornerRadius: 10)
+        hsButton.strokeColor = UIColor.black
+        addChild(hsButton)
         
         
         
@@ -55,6 +67,13 @@ class MainMenuScene: SKScene {
                 if let view = view {
                     let transition:SKTransition = SKTransition.fade(withDuration: 1)
                     let scene:SKScene = GameScene(size: self.size)
+                    self.view?.presentScene(scene, transition: transition)
+                }
+            }
+            else if node == hsButton {
+                if let view = view {
+                    let transition:SKTransition = SKTransition.fade(withDuration: 1)
+                    let scene:SKScene = HighScores(size: self.size)
                     self.view?.presentScene(scene, transition: transition)
                 }
             }

@@ -48,7 +48,8 @@ extension CGPoint {
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
     
-    let player = SKSpriteNode(imageNamed: "player")
+    let player = mySKSpriteNode(imageNamed: "player")
+    let ground = SKShapeNode()
     let enemiesCanStillTakeHitsFromIcon = SKSpriteNode(imageNamed: "enemy")
     var invisiwall = SKShapeNode()
     var pauseButton = SKShapeNode()
@@ -72,6 +73,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     var platforms: [PlatformStruct] = []
     var teleportDistance : Double = 0.0
+    var lastGroundSpawnTimeInterval : TimeInterval = 0
+    var lastUpdateTimeInterval : TimeInterval = 0
     
     
     //Swipes
@@ -79,6 +82,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     let swipeLeftRec = UISwipeGestureRecognizer()
     let swipeUpRec = UISwipeGestureRecognizer()
     let swipeDownRec = UISwipeGestureRecognizer()
+    //Tap
+    let tapRec = UITapGestureRecognizer()
+
     
     override func didMove(to view: SKView) {
         
@@ -91,8 +97,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         enemiesCanStillTakeHitsFromIcon.anchorPoint = CGPoint(x: 0, y: 0)
         enemiesCanStillTakeHitsFromIcon.position = CGPoint(x: size.width * 0.05, y: size.height * 0.88)
+        enemiesCanStillTakeHitsFromIcon.zPosition += 50
         player.anchorPoint = CGPoint(x: 0, y: 0)
-        player.position = CGPoint(x: size.width * 0.1, y: size.height * 3 / 7)
+        player.position = CGPoint(x: size.width * 0.1, y: size.height * 1 / 7)
         
         let width: Double = Double(size.width) * xScaler
         let height: Double = Double(size.height) * yScaler
@@ -138,30 +145,108 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         swipeDownRec.direction = .down
         self.view!.addGestureRecognizer(swipeDownRec)
         
+        tapRec.addTarget(self, action:#selector(self.tappedView(_:) ))
+        tapRec.numberOfTouchesRequired = 1
+        tapRec.numberOfTapsRequired = 1
+        self.view!.addGestureRecognizer(tapRec)
+        
         
         physicsWorld.gravity = CGVector.zero
         physicsWorld.contactDelegate = self
         
         makePauseButton()
         makeScoreLabel()
+        makeGround()
         makeEnemiesCanStillTakeHitsFromLabel()
         
         /* Teleport/Jump tester
         run(SKAction.repeatForever(SKAction.sequence([SKAction.run(addPlatform), SKAction.run(jumpUp), SKAction.wait(forDuration: 1), SKAction.run(teleportRight), SKAction.wait(forDuration: 1), SKAction.run(teleportLeft), SKAction.wait(forDuration: 1), SKAction.run(jumpDown), SKAction.wait(forDuration: 1)])))
         */
         
-        run(SKAction.repeatForever(SKAction.sequence([SKAction.run(addPlatform), SKAction.wait(forDuration: 1)])))
+        run(SKAction.repeatForever(SKAction.sequence([SKAction.run(addPlatform), SKAction.run(addGroundMonster), SKAction.wait(forDuration: 1)  ])))
     }
     
+    func makeGround() {
+        let startPoint: CGPoint = CGPoint(x: 0, y: 0)
+        let endPoint: CGPoint = CGPoint(x: size.width, y: 0)
+        let path: CGMutablePath = CGMutablePath()
+        path.move(to: startPoint)
+        path.addLine(to: endPoint)
+        
+        ground.position = CGPoint(x: 0, y: 1/7*size.height)
+        ground.path = path
+        ground.strokeColor = UIColor.black
+        ground.lineWidth = 2
+        addChild(ground)
+        platforms.append(PlatformStruct(platform: ground, length: Double(size.width), height: Double(1/7*size.height)))
+    }
+    
+    func addGroundMonster() {
+        let groundEnemyRate = 3
+        let randomEnemyNumber = Double(arc4random_uniform(UInt32(groundEnemyRate)))
+        if (randomEnemyNumber == 0) {
+            let point: CGPoint = CGPoint(x: Double(size.width)*1.1, y: 0)
+            let enemy = addEnemy(platform: ground, point: point)
+        
+        
+        
+            let time = (Double(size.width)*1.1) / Double(platformAndEnemySpeed)
+            let move = SKAction.moveTo(x: -CGFloat(xScaler)*size.width, duration: TimeInterval(time))
+            let moveDone = SKAction.removeFromParent()
+            enemy.run(SKAction.sequence([move, moveDone]))
+        }
+    }
+    
+    override func update(_ currentTime: TimeInterval){
+        checkIfFloating()
+    }
+    
+    func checkIfFloating() {
+        if self.speed == 0 {
+            return
+        }
+        
+        if player.isMoving() {
+            return
+        }
+        
+        //print("player's location is ", player.position)
+        var shouldJumpDown : Bool = true
+        for platformStruct in platforms {
+            //If platform has same height as player
+            if ((CGFloat(platformStruct.height) * 0.999 < player.position.y)
+                && (CGFloat(platformStruct.height) * 1.001 > player.position.y)) {
+                //print("a platform has same height")
+                
+                if (CGFloat(platformStruct.height) * 0.999 > size.height * 1/7) {
+                    //print("and platform isn't the ground")
+                
+                    //If player on the platform
+                    if player.position.x + size.width*CGFloat(xScaler) > platformStruct.platform.position.x
+                    && player.position.x < platformStruct.platform.position.x + CGFloat(platformStruct.length) {
+                        //print("on platform")
+                        shouldJumpDown = false
+                    }
+                }
+                else {
+                    //print("on the gorund")
+                }
+            }
+            
+        }
+        
+        if shouldJumpDown {
+            //print("calling jump down")
+            jumpDown()
+        }
+    }
     
     func addPlatform() {
         
-        let platformNumber: Double = Double(arc4random_uniform(5)) + 1
+        let platformNumber: Double = Double(arc4random_uniform(4)) + 2
         let height: Double = platformNumber / 7 * Double(size.height)
         let randomLength: Double = Double(arc4random_uniform(9)) + 2
         let width: Double = randomLength * Double(size.width) / 10
-        //let path: CGMutablePath = CGMutablePath()
-        
         
         let startPoint: CGPoint = CGPoint(x: 0, y: 0)
         let endPoint: CGPoint = CGPoint(x: width, y: 0)
@@ -176,10 +261,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         platform.strokeColor = UIColor.black
         platform.lineWidth = 2
         addChild(platform)
-        //print("Platform added. origin is ", platform.frame.origin, " position is ", platform.position, " parent is ", platform.parent!, "\n")
         platforms.append(PlatformStruct(platform: platform, length: width, height: height))
         
-        let enemyRate = 2;
+        let enemyRate = 2
         for i in 2...Int(randomLength) {
             let randomEnemyNumber = Double(arc4random_uniform(UInt32(enemyRate)))
             //For each segment of platform, "1 in enemyRate" chance enemy spawned there
@@ -190,53 +274,26 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             
         }
         
-        
-        
-        
-        /*let time = (Double(point.x) + width) / Double(platformAndEnemySpeed)
-        let move = SKAction.move(to: CGPoint(x: CGFloat(-width), y: point.y), duration: TimeInterval(time))
-        let moveDone = SKAction.removeFromParent()
-        let loseAction = SKAction.run() {
-            let reveal = SKTransition.flipHorizontal(withDuration: 0.5)
-            let gameOverScene = GameOverScene(size: self.size)
-            self.view?.presentScene(gameOverScene, transition: reveal)
-        }
-        enemy.run(SKAction.sequence([move, loseAction, moveDone]))
-        */
-        
         let time = (Double(size.width) + width) / Double(platformAndEnemySpeed)
         let move = SKAction.moveTo(x: -CGFloat(width), duration: TimeInterval(time))
         let moveDone = SKAction.removeFromParent()
         
         platform.run(SKAction.sequence([move, SKAction.run(
             {
-                //let length = self.platforms.count - 1
                 var flag : Bool = true
                 var index : Int = 0
                 while flag {
                     if self.platforms[index].platform.hashValue == platform.hashValue {
-                        //print("found it")
                         flag = false
                         self.platforms.remove(at: index)
                     }
                     index += 1
-                }
-            }
-            ), moveDone]))
-        
-        
-        
-        
-        
-        
-        
-        // let index = platforms.index(of: platform)
-        //platforms.remove(at: index!)
+                }                   }), moveDone]))
     }
  
     /*  Enemy will be child of the platform that calls it.
         Enemy will be spawned at given CGPoint. */
-    func addEnemy(platform: SKShapeNode, point : CGPoint) {
+    func addEnemy(platform: SKShapeNode, point : CGPoint)-> SKSpriteNode {
     
         let enemy = SKSpriteNode(imageNamed: "enemy")
         enemy.position = point
@@ -252,20 +309,28 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         enemy.physicsBody?.categoryBitMask = PhysicsCategory.Enemy
         enemy.physicsBody?.contactTestBitMask = PhysicsCategory.Bullet
         enemy.physicsBody?.collisionBitMask = PhysicsCategory.None
+        
+        return enemy
     }
     
     
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        
+    // what gets called when there's a single tap...
+    //notice the sender is a parameter. This is why we added (_:) that part to the selector earlier
+    
+    func tappedView(_ sender:UITapGestureRecognizer) {
+        var point:CGPoint = sender.location(in: self.view)
+        point.y = size.height - point.y
+        //print("Single tap")
+        /*
         // 1 - Choose one of the touches to work with
         guard let touch = touches.first else {
             return
         }
         let touchLocation = touch.location(in: self)
+        */
         
         
-        
-        let node = self.atPoint(touchLocation)
+        let node = self.atPoint(point)
         if node == pauseButton {
             pauseButtonHit()
             return
@@ -273,7 +338,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         if self.speed == 0 {
             return
         }
-    
+        
+        //print("tap! at point is ", point)
+        
+        
         // 2 - Set up initial location of projectile
         let bullet = SKSpriteNode(imageNamed: "bullet")
         bullet.position.x = player.position.x + (size.width * CGFloat(xScaler))
@@ -285,7 +353,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         bullet.scale(to: CGSize(width: width, height: height))
         
         // 3 - Determine offset of location to projectile
-        let offset = touchLocation - bullet.position
+        let offset = point - bullet.position
         
         
         
@@ -317,38 +385,32 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         addChild(bullet)
         
         /*for item in platforms {
-            print("platform hash value: ", item.platform.hashValue, "platform position: ", item.platform.position, " platform length: ", item.length, " player's position: ", player.position)
-        }*/
+         print("platform hash value: ", item.platform.hashValue, "platform position: ", item.platform.position, " platform length: ", item.length, " player's position: ", player.position)
+         }*/
         
         // 9 - Create the actions
         let actionMove = SKAction.move(to: destination, duration: 2.0)
         let actionMoveDone = SKAction.removeFromParent()
         bullet.run(SKAction.sequence([actionMove, actionMoveDone]))
-        
     }
-
+    
     func swipedRight() {
-        //print("Right")
         teleportRight()
     }
     
     func swipedLeft() {
-        //print("Left")
         teleportLeft()
     }
     
     func swipedUp() {
-        //print("Up")
         jumpUp()
     }
     
     func swipedDown() {
-        //print("Down")
         jumpDown()
     }
 
     func bulletDidCollideWithEnemy(bullet: SKSpriteNode, enemy: SKSpriteNode) {
-        //print("Hit")
         enemiesKilled += 1
         score += 1
         updateScore()
@@ -366,7 +428,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     func gameOver() {
         let reveal = SKTransition.flipHorizontal(withDuration: 0.5)
-        let gameOverScene = GameOverScene(size: self.size)
+        let gameOverScene = GameOverScene(size: self.size, score: score)
         self.view?.presentScene(gameOverScene, transition: reveal)
     }
     
@@ -376,6 +438,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         enemiesCanStillTakeHitsFromLabel.fontSize = 25
         enemiesCanStillTakeHitsFromLabel.fontColor = SKColor.red
         enemiesCanStillTakeHitsFromLabel.position = CGPoint(x: size.width*15/100, y: size.height*88/100)
+        enemiesCanStillTakeHitsFromLabel.zPosition += 100
         addChild(enemiesCanStillTakeHitsFromLabel)
     }
     
@@ -385,6 +448,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         scoreLabel.fontSize = 25
         scoreLabel.fontColor = SKColor.yellow
         scoreLabel.position = CGPoint(x: size.width*93/100, y: size.height*88/100)
+        scoreLabel.zPosition += 100
         addChild(scoreLabel)
     }
     
@@ -402,6 +466,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         pauseLabel.fontSize = 10
         pauseLabel.fontColor = SKColor.blue
         pauseLabel.position = CGPoint(x: size.width*7/100, y: size.height*5/100)
+        pauseLabel.zPosition += 100
         addChild(pauseLabel)
         
         
@@ -409,6 +474,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let path = CGRect.init(x: Double(size.width*2/100), y: Double(size.height*35/1000), width: Double(size.width*10/100), height: Double(size.height*7/100))
         pauseButton = SKShapeNode.init(rect: path, cornerRadius: 5)
         pauseButton.strokeColor = UIColor.black
+        pauseButton.zPosition += 150
         addChild(pauseButton)
     }
     
@@ -475,6 +541,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
  
     func jumpUp() {
         //If no platforms possibly above, do nothing & return
+        //print("inside jumpUp")
         if Double(player.position.y) >= 5 / 7 * Double(size.height) {
             return
         }
@@ -483,22 +550,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         for platformStruct in platforms {
             //If platform above player
-            if (CGFloat(platformStruct.platform.position.y) > player.position.y) {
-                
-                
-                //let convertedPosition = platformStruct.platform.scene?.convert(platformStruct.platform.position,
-                                                                               //from: platformStruct.platform.parent!)
-                
-                //print("platform hash value: ", platformStruct.platform.hashValue, "platform position: ", platformStruct.platform.position, " platform length: ", platformStruct.length, " platform height: ", platformStruct.height)
-                
-                
+            if (CGFloat(platformStruct.platform.position.y)*0.999 > player.position.y) {
                 
                 //If player is within the platforms x span
                 if ((platformStruct.platform.position.x) < (player.position.x + size.width * CGFloat(xScaler))) &&
                     ((Double(platformStruct.platform.position.x) + platformStruct.length) > Double(player.position.x)) {
                     
                     //If platform is the next lowest platform above, update lowestYAbove
-                    if CGFloat(platformStruct.height) < lowestYAbove {
+                    if CGFloat(platformStruct.height)*0.999 < lowestYAbove {
                             lowestYAbove = CGFloat(platformStruct.height)
                     }
                 }
@@ -507,7 +566,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
  
         if lowestYAbove < size.height {
             let time = (Double(lowestYAbove - player.position.y)) / Double(teleportSpeed)
-            player.run(SKAction.moveTo(y: lowestYAbove, duration: time))
+            let move = SKAction.moveTo(y: lowestYAbove, duration: time)
+            player.run(SKAction.sequence([SKAction.run( {
+                self.player.setMoving() }), move, SKAction.run( {
+                    self.player.stopMoving() })]))
         }
         
     }
@@ -515,7 +577,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     func jumpDown() {
         //If no platforms possibly below, do nothing & return
-        if Double(player.position.y) <= 1 / 7 * Double(size.height) {
+        if Double(player.position.y) <= (1 / 7 * Double(size.height))*1.001 {
             return
         }
         
@@ -539,7 +601,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         if highestYBelow > 0 {
             let time = (Double(player.position.y) - Double(highestYBelow)) / Double(teleportSpeed)
-            player.run(SKAction.moveTo(y: highestYBelow, duration: time))
+            
+            let move = SKAction.moveTo(y: highestYBelow, duration: time)
+            player.run(SKAction.sequence([SKAction.run( {
+                self.player.setMoving() }), move, SKAction.run( {
+                    self.player.stopMoving() })]))
         }
 
     }
@@ -576,5 +642,22 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             (secondBody.categoryBitMask & PhysicsCategory.Invisiwall != 0)) {
                 enemyCollideWithInvisiwall()
         }
+    }
+}
+
+
+class mySKSpriteNode: SKSpriteNode {
+    var moving : Bool = false
+    
+    func setMoving() {
+        moving = true
+    }
+    
+    func stopMoving() {
+        moving = false
+    }
+    
+    func isMoving() -> Bool {
+        return moving
     }
 }

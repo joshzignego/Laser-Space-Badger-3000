@@ -8,8 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		20CF4FD81F2FE83700C6D5DA /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20CF4FD71F2FE83700C6D5DA /* AppDelegate.swift */; };
-		20CF4FDA1F2FE83700C6D5DA /* GameScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = 20CF4FD91F2FE83700C6D5DA /* GameScene.sks */; };
-		20CF4FDC1F2FE83700C6D5DA /* Actions.sks in Resources */ = {isa = PBXBuildFile; fileRef = 20CF4FDB1F2FE83700C6D5DA /* Actions.sks */; };
 		20CF4FDE1F2FE83700C6D5DA /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20CF4FDD1F2FE83700C6D5DA /* GameScene.swift */; };
 		20CF4FE01F2FE83700C6D5DA /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20CF4FDF1F2FE83700C6D5DA /* GameViewController.swift */; };
 		20CF4FE31F2FE83700C6D5DA /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 20CF4FE11F2FE83700C6D5DA /* Main.storyboard */; };
@@ -17,6 +15,7 @@
 		20CF4FE81F2FE83700C6D5DA /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 20CF4FE61F2FE83700C6D5DA /* LaunchScreen.storyboard */; };
 		20CF4FF31F2FE83800C6D5DA /* Laser_Space_Man_3000Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20CF4FF21F2FE83800C6D5DA /* Laser_Space_Man_3000Tests.swift */; };
 		20CF4FFE1F2FE83800C6D5DA /* Laser_Space_Man_3000UITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20CF4FFD1F2FE83800C6D5DA /* Laser_Space_Man_3000UITests.swift */; };
+		20DCEC6C1F336AD0004C607B /* HighScores.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20DCEC6B1F336AD0004C607B /* HighScores.swift */; };
 		20E125861F31437100D17028 /* GameOverScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20E125851F31437100D17028 /* GameOverScene.swift */; };
 		20E125881F31438A00D17028 /* MainMenuScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20E125871F31438A00D17028 /* MainMenuScene.swift */; };
 		20E125941F31ABCF00D17028 /* Fipps-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 20E125911F31AAE700D17028 /* Fipps-Regular.otf */; };
@@ -42,8 +41,6 @@
 /* Begin PBXFileReference section */
 		20CF4FD41F2FE83700C6D5DA /* Laser Space Man 3000.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Laser Space Man 3000.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		20CF4FD71F2FE83700C6D5DA /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		20CF4FD91F2FE83700C6D5DA /* GameScene.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = GameScene.sks; sourceTree = "<group>"; };
-		20CF4FDB1F2FE83700C6D5DA /* Actions.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = Actions.sks; sourceTree = "<group>"; };
 		20CF4FDD1F2FE83700C6D5DA /* GameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScene.swift; sourceTree = "<group>"; };
 		20CF4FDF1F2FE83700C6D5DA /* GameViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewController.swift; sourceTree = "<group>"; };
 		20CF4FE21F2FE83700C6D5DA /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -56,6 +53,7 @@
 		20CF4FF91F2FE83800C6D5DA /* Laser Space Man 3000UITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Laser Space Man 3000UITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		20CF4FFD1F2FE83800C6D5DA /* Laser_Space_Man_3000UITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Laser_Space_Man_3000UITests.swift; sourceTree = "<group>"; };
 		20CF4FFF1F2FE83800C6D5DA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		20DCEC6B1F336AD0004C607B /* HighScores.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HighScores.swift; sourceTree = "<group>"; };
 		20E125851F31437100D17028 /* GameOverScene.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameOverScene.swift; sourceTree = "<group>"; };
 		20E125871F31438A00D17028 /* MainMenuScene.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainMenuScene.swift; sourceTree = "<group>"; };
 		20E125911F31AAE700D17028 /* Fipps-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Fipps-Regular.otf"; sourceTree = "<group>"; };
@@ -111,8 +109,6 @@
 			isa = PBXGroup;
 			children = (
 				20CF4FD71F2FE83700C6D5DA /* AppDelegate.swift */,
-				20CF4FD91F2FE83700C6D5DA /* GameScene.sks */,
-				20CF4FDB1F2FE83700C6D5DA /* Actions.sks */,
 				20CF4FDD1F2FE83700C6D5DA /* GameScene.swift */,
 				20CF4FDF1F2FE83700C6D5DA /* GameViewController.swift */,
 				20CF4FE11F2FE83700C6D5DA /* Main.storyboard */,
@@ -121,6 +117,7 @@
 				20CF4FE61F2FE83700C6D5DA /* LaunchScreen.storyboard */,
 				20E125871F31438A00D17028 /* MainMenuScene.swift */,
 				20CF4FE91F2FE83700C6D5DA /* Info.plist */,
+				20DCEC6B1F336AD0004C607B /* HighScores.swift */,
 			);
 			path = "Laser Space Man 3000";
 			sourceTree = "<group>";
@@ -260,10 +257,8 @@
 			files = (
 				20E125941F31ABCF00D17028 /* Fipps-Regular.otf in Resources */,
 				20CF4FE31F2FE83700C6D5DA /* Main.storyboard in Resources */,
-				20CF4FDA1F2FE83700C6D5DA /* GameScene.sks in Resources */,
 				20CF4FE51F2FE83700C6D5DA /* Assets.xcassets in Resources */,
 				20CF4FE81F2FE83700C6D5DA /* LaunchScreen.storyboard in Resources */,
-				20CF4FDC1F2FE83700C6D5DA /* Actions.sks in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -292,6 +287,7 @@
 				20CF4FDE1F2FE83700C6D5DA /* GameScene.swift in Sources */,
 				20CF4FE01F2FE83700C6D5DA /* GameViewController.swift in Sources */,
 				20E125861F31437100D17028 /* GameOverScene.swift in Sources */,
+				20DCEC6C1F336AD0004C607B /* HighScores.swift in Sources */,
 				20CF4FD81F2FE83700C6D5DA /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
