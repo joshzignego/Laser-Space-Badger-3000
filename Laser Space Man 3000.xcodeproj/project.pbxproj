@@ -16,6 +16,8 @@
 		20CF4FF31F2FE83800C6D5DA /* Laser_Space_Man_3000Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20CF4FF21F2FE83800C6D5DA /* Laser_Space_Man_3000Tests.swift */; };
 		20CF4FFE1F2FE83800C6D5DA /* Laser_Space_Man_3000UITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20CF4FFD1F2FE83800C6D5DA /* Laser_Space_Man_3000UITests.swift */; };
 		20DCEC6C1F336AD0004C607B /* HighScores.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20DCEC6B1F336AD0004C607B /* HighScores.swift */; };
+		20DCEC701F33FE90004C607B /* MyPlayerNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20DCEC6F1F33FE90004C607B /* MyPlayerNode.swift */; };
+		20DCEC721F3691AD004C607B /* Button.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20DCEC711F3691AD004C607B /* Button.swift */; };
 		20E125861F31437100D17028 /* GameOverScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20E125851F31437100D17028 /* GameOverScene.swift */; };
 		20E125881F31438A00D17028 /* MainMenuScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20E125871F31438A00D17028 /* MainMenuScene.swift */; };
 		20E125941F31ABCF00D17028 /* Fipps-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 20E125911F31AAE700D17028 /* Fipps-Regular.otf */; };
@@ -54,6 +56,8 @@
 		20CF4FFD1F2FE83800C6D5DA /* Laser_Space_Man_3000UITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Laser_Space_Man_3000UITests.swift; sourceTree = "<group>"; };
 		20CF4FFF1F2FE83800C6D5DA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		20DCEC6B1F336AD0004C607B /* HighScores.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HighScores.swift; sourceTree = "<group>"; };
+		20DCEC6F1F33FE90004C607B /* MyPlayerNode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MyPlayerNode.swift; sourceTree = "<group>"; };
+		20DCEC711F3691AD004C607B /* Button.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Button.swift; sourceTree = "<group>"; };
 		20E125851F31437100D17028 /* GameOverScene.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameOverScene.swift; sourceTree = "<group>"; };
 		20E125871F31438A00D17028 /* MainMenuScene.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainMenuScene.swift; sourceTree = "<group>"; };
 		20E125911F31AAE700D17028 /* Fipps-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Fipps-Regular.otf"; sourceTree = "<group>"; };
@@ -110,7 +114,9 @@
 			children = (
 				20CF4FD71F2FE83700C6D5DA /* AppDelegate.swift */,
 				20CF4FDD1F2FE83700C6D5DA /* GameScene.swift */,
+				20DCEC711F3691AD004C607B /* Button.swift */,
 				20CF4FDF1F2FE83700C6D5DA /* GameViewController.swift */,
+				20DCEC6F1F33FE90004C607B /* MyPlayerNode.swift */,
 				20CF4FE11F2FE83700C6D5DA /* Main.storyboard */,
 				20CF4FE41F2FE83700C6D5DA /* Assets.xcassets */,
 				20E125851F31437100D17028 /* GameOverScene.swift */,
@@ -216,6 +222,7 @@
 				TargetAttributes = {
 					20CF4FD31F2FE83700C6D5DA = {
 						CreatedOnToolsVersion = 8.3.3;
+						DevelopmentTeam = T2P3JRX5A4;
 						ProvisioningStyle = Automatic;
 					};
 					20CF4FED1F2FE83800C6D5DA = {
@@ -284,7 +291,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				20E125881F31438A00D17028 /* MainMenuScene.swift in Sources */,
+				20DCEC701F33FE90004C607B /* MyPlayerNode.swift in Sources */,
 				20CF4FDE1F2FE83700C6D5DA /* GameScene.swift in Sources */,
+				20DCEC721F3691AD004C607B /* Button.swift in Sources */,
 				20CF4FE01F2FE83700C6D5DA /* GameViewController.swift in Sources */,
 				20E125861F31437100D17028 /* GameOverScene.swift in Sources */,
 				20DCEC6C1F336AD0004C607B /* HighScores.swift in Sources */,
@@ -442,10 +451,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				DEVELOPMENT_TEAM = T2P3JRX5A4;
 				INFOPLIST_FILE = "Laser Space Man 3000/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "Josh-Zignego.Laser-Space-Man-3000";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
@@ -454,10 +467,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				DEVELOPMENT_TEAM = T2P3JRX5A4;
 				INFOPLIST_FILE = "Laser Space Man 3000/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "Josh-Zignego.Laser-Space-Man-3000";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
