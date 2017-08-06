@@ -81,6 +81,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var teleportDistance : Double = 0.0
     var lastGroundSpawnTimeInterval : TimeInterval = 0
     var lastUpdateTimeInterval : TimeInterval = 0
+    var ptu : Double = 0
     
     
     //Swipes
@@ -99,7 +100,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         spriteView = self.view!
         player.setMoving(value: false)
         physicsWorld.contactDelegate = self
-        physicsWorld.gravity = CGVector.init(dx: 0, dy: -5)
+        //physicsWorld.gravity = CGVector.init(dx: 0, dy: -5)
+        ptu = Double(1.0 / sqrt(SKPhysicsBody.init(rectangleOf: CGSize(width:1, height:1)).mass))
+        
         
         initializePlayer()
         makeEnemiesIcon()
@@ -554,8 +557,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             return
         }
         
+        let dy = player.physicBody?.mass * sqrt(2 * -self.physicsWorld.gravity.dy * (size.height*2/7 * ptu))
         player.setMoving(value: true)
-        let vector = CGVector.init(dx: 0, dy: Double(size.height)*0.08)
+        let vector = CGVector.init(dx: 0, dy: dy)
         player.physicsBody?.applyImpulse(vector)
         
     }
@@ -588,7 +592,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         //bulletRemoverWall
         //let rectangle2 = CGRect.init(x: 0, y: 0, width: 2, height: Double(size.height))
         bulletRemoverWall = SKShapeNode.init(rect: rectangle)
-        bulletRemoverWall.position = CGPoint(x: CGFloat(xScaler)*size.width + size.width + 1, y: size.height/2)
+        bulletRemoverWall.position = CGPoint(x: size.width + 1, y: size.height/2)
         bulletRemoverWall.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: 2, height: size.height))
         bulletRemoverWall.physicsBody?.isDynamic = false
         bulletRemoverWall.physicsBody?.categoryBitMask = PhysicsCategory.BulletRemoverWall
@@ -630,10 +634,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 enemyCollideWithEnemyCounterWall()
         }
         
-        // Check if buller & bulletRemoverWall collide
+        // Check if bullet & bulletRemoverWall collide
         if ((firstBody.categoryBitMask & PhysicsCategory.Bullet != 0) &&
             (secondBody.categoryBitMask & PhysicsCategory.BulletRemoverWall != 0)) {
-            bulletCollideWithBulletRemoverWall(node: firstBody.node!)
+            if firstBody.node != nil {
+                bulletCollideWithBulletRemoverWall(node: firstBody.node!)
+            }
         }
     }
  
@@ -652,11 +658,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         player.physicsBody?.restitution = 0
         player.physicsBody?.friction = 0
         player.physicsBody?.usesPreciseCollisionDetection = true
-        
-        //let range = SKRange.init(lowerLimit: size.height/7 + CGFloat(yScaler) * size.height/2, upperLimit: size.height*6/7)
-        //player.constraints?.append(SKConstraint.positionY(range))
-
-        
         player.physicsBody?.categoryBitMask = PhysicsCategory.Player
         player.physicsBody?.contactTestBitMask = PhysicsCategory.Enemy
         player.physicsBody?.collisionBitMask = PhysicsCategory.Platform

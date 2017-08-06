@@ -64,14 +64,14 @@ class MainMenuScene: SKScene {
             let node = self.atPoint(pos)
             
             if node == playButtonDoneAsAShape {
-                if let view = view {
+                if view != nil {
                     let transition:SKTransition = SKTransition.fade(withDuration: 1)
                     let scene:SKScene = GameScene(size: self.size)
                     self.view?.presentScene(scene, transition: transition)
                 }
             }
             else if node == hsButton {
-                if let view = view {
+                if view != nil {
                     let transition:SKTransition = SKTransition.fade(withDuration: 1)
                     let scene:SKScene = HighScores(size: self.size)
                     self.view?.presentScene(scene, transition: transition)
