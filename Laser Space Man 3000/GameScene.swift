@@ -64,24 +64,27 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var areYouSure_No = Button()
     var scoreLabel = SKLabelNode()
     var enemiesCanStillTakeHitsFromLabel = SKLabelNode()
-    let xScaler: Double = 0.05
-    let yScaler: Double = 0.10
+    let xScaler: Double = 0.06
+    let yScaler: Double = 0.12
     var score: Int = 0
-    let maxPlatformLength = 10
+    let maxPlatformLength = 15
     let platformAndEnemySpeed = 100
     var ammo = 0
     let enemiesPassedToDie = 30
+    let segmentLength = 10 //# of platform segments/ size.width
     var enemiesCanStillTakeHitsFrom: Int = 0
     var enemiesKilled : Int = 0
     var enemiesPassed : Int = 0
-    let shootEmemyRate = 10   //0 means max enemies, higher numer means less enemies
-    let ramEnemyRate = 10
+    let shootEmemyRate = 3   //0 means max enemies, higher numer means less enemies
+    let ramEnemyRate = 3
     struct PlatformStruct {
         let platform : SKShapeNode
         let length : Double
         let height : Double
+        var swipeDownThrough : Bool
     }
     var platforms: [PlatformStruct] = []
+    var doublePlatformPreventerArray: [Int] = [0,0,0,0]
     var lastGroundSpawnTimeInterval : TimeInterval = 0
     var lastUpdateTimeInterval : TimeInterval = 0
     var runningFrames : [SKTexture]!
@@ -101,15 +104,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         self.scaleMode = SKSceneScaleMode.resizeFill
         spriteView = self.view!
         physicsWorld.contactDelegate = self
-        
-        
-        
-        
-        
-        
-        
-        
-        
         
         initializePlayer()
         player.beginRunAnimation()
@@ -156,8 +150,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 self.player.physicsBody?.velocity.dx = 0
                 
                 // Prevent collisions if the hero is jumping
-                for plat in platforms {
+                //for plat in platforms {
+                for var plat in platforms {
+                    plat.platform.physicsBody?.categoryBitMask = PhysicsCategory.Platform
                     plat.platform.physicsBody?.collisionBitMask = PhysicsCategory.None
+                    plat.swipeDownThrough = false
                 }
                 body.collisionBitMask &= ~PhysicsCategory.Platform
             }
@@ -172,9 +169,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 self.player.setMoving(direction: "left", value: false)
                 self.player.physicsBody?.velocity.dx = 0
                 body.collisionBitMask |= PhysicsCategory.Platform
-                for plat in platforms {
-                    plat.platform.physicsBody?.collisionBitMask = PhysicsCategory.Player
-                }
             }
         }
     }
@@ -200,7 +194,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         ground.physicsBody?.collisionBitMask = PhysicsCategory.Player
     
         addChild(ground)
-        platforms.append(PlatformStruct(platform: ground, length: Double(size.width), height: Double(1/7*size.height)))
+        platforms.append(PlatformStruct(platform: ground, length: Double(size.width), height: Double(1/7*size.height), swipeDownThrough: false))
     }
     
     func addGroundMonster() {
@@ -230,10 +224,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func addPlatform() {
-        let platformNumber: Double = Double(arc4random_uniform(4)) + 2
-        let platHeight: Double = platformNumber / 7 * Double(size.height)
-        let randomLength: Double = Double(arc4random_uniform(UInt32(maxPlatformLength-1))) + 1
-        let platLength: Double = randomLength * Double(size.width) / Double(maxPlatformLength)
+        let platformNumber : Int = Int(arc4random_uniform(4)) + 2
+        if doublePlatformPreventerArray[platformNumber - 2] > 0  {
+            return
+        }
+        let platHeight: Double = Double(platformNumber) / 7 * Double(size.height)
+        let randomLength: Int = Int(arc4random_uniform(UInt32(maxPlatformLength-1))) + 4
+        let platLength: Double = Double(randomLength) * Double(size.width) / Double(segmentLength)
         
         var platform = SKShapeNode()
         let rectangle = CGRect.init(x: 0, y: 0, width: platLength, height: 2)
@@ -243,7 +240,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         platform.strokeColor = UIColor.black
         addChild(platform)
-        platforms.append(PlatformStruct(platform: platform, length: platLength, height: platHeight))
+        platforms.append(PlatformStruct(platform: platform, length: platLength, height: platHeight, swipeDownThrough: false))
         
         platform.physicsBody?.isDynamic = false
         platform.physicsBody?.affectedByGravity = false
@@ -257,10 +254,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         platform.physicsBody?.collisionBitMask = PhysicsCategory.Player
 
         
-        for i in 1...Int(randomLength) {
+        for i in 1...randomLength {
             let randomShootNumber = Double(arc4random_uniform(UInt32(shootEmemyRate)))
             let randomRamNumber = Double(arc4random_uniform(UInt32(ramEnemyRate)))
-            let point: CGPoint = CGPoint(x: Double(i)*Double(size.width)/10 - (Double(size.width) * xScaler), y: 2)
+            let point: CGPoint = CGPoint(x: Double(i)*Double(size.width)/Double(segmentLength) - (Double(size.width) * xScaler), y: 2)
             
             //For each segment of platform, "1 in shootEmemyRate" chance enemy spawned there
             if randomShootNumber == 0 {
@@ -271,6 +268,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 addRamEnemy(platform: platform, point: point)
             }
         }
+        //Gap between platforms
+        doublePlatformPreventerArray[platformNumber - 2] += 1
+        let timeForGap = (3 * Double(size.width) / Double(maxPlatformLength)) / Double(platformAndEnemySpeed)
+        let timeForLastSegmentToEnterScreen = platLength / Double(platformAndEnemySpeed)
+        
+        
+        self.run(SKAction.sequence([SKAction.wait(forDuration: timeForGap + timeForLastSegmentToEnterScreen),
+            SKAction.run({              self.doublePlatformPreventerArray[platformNumber - 2] -= 1               })]))
         
         
         
@@ -648,7 +653,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         if !player.isMoving(direction: "up") && !player.isMoving(direction: "down") {
             player.beginKickAnimation()
             player.setMoving(direction: "right", value: true)
-            let vector = CGVector.init(dx: size.width*0.04, dy: 0)
+            let vector = CGVector.init(dx: size.width*0.05, dy: 0)
             player.physicsBody?.applyImpulse(vector)
         }
     }
@@ -660,7 +665,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         if !player.isMoving(direction: "up") && !player.isMoving(direction: "down") {
             player.beginKickAnimation()
             player.setMoving(direction: "left", value: true)
-            let vector = CGVector.init(dx: -size.width*0.04, dy: 0)
+            let vector = CGVector.init(dx: -size.width*0.05, dy: 0)
             player.physicsBody?.applyImpulse(vector)
         }
     }
@@ -668,15 +673,28 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     func jumpUp() {
         player.setMoving(direction: "up", value: true)
         player.beginJumpAnimation()
-        let vector = CGVector.init(dx: 0, dy: size.height*0.095)
+        let vector = CGVector.init(dx: 0, dy: size.height*0.103)
         player.physicsBody?.applyImpulse(vector)
     }
     
     func jumpDown() {
+        print("Player position: ", player.position)
         player.setMoving(direction: "up", value: false)
         player.setMoving(direction: "down", value: true)
         player.beginJumpAnimation()
-        let vector = CGVector.init(dx: 0, dy: -size.height * 0.095)
+        for var plat in platforms {
+            print("Plat height: ", plat.height)
+            if (CGFloat(plat.height)*1.03 > (player.position.y - CGFloat(yScaler)*size.height/2) && CGFloat(plat.height)*0.97 < player.position.y - CGFloat(yScaler)*size.height/2) &&
+                (plat.platform.position.x - CGFloat(xScaler)*size.width/2*3 <= player.position.x && plat.platform.position.x + CGFloat(plat.length) >= player.position.x - 3/2*size.width*CGFloat(xScaler)) {
+                if !(plat.platform.position.y*1.03 > ground.position.y && plat.platform.position.y*0.97 < ground.position.y) {
+                    print("found swipe down platform")
+                    plat.platform.physicsBody?.categoryBitMask = PhysicsCategory.None
+                    plat.platform.physicsBody?.collisionBitMask = PhysicsCategory.None
+                    plat.swipeDownThrough =  true
+                }
+            }
+        }
+        let vector = CGVector.init(dx: 0, dy: -size.height * 0.103)
         player.physicsBody?.applyImpulse(vector)
         
     }
@@ -686,6 +704,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let rectangle3 = CGRect.init(x: 0, y: 0, width: size.width, height: size.height*6/7)
         barrier = SKShapeNode.init(rect: rectangle3)
         barrier.physicsBody = SKPhysicsBody(edgeLoopFrom: rectangle3)
+        barrier.strokeColor = SKColor.clear
         barrier.physicsBody?.isDynamic = false
         barrier.physicsBody?.restitution = 0
         barrier.physicsBody?.categoryBitMask = PhysicsCategory.Barrier

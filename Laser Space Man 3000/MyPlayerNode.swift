@@ -23,6 +23,26 @@ class MyPlayerNode: SKSpriteNode {
         super.init(texture: texture, color: SKColor.clear, size: texture.size())
     }
     
+    func initializePlayer(scene: GameScene) {
+        self.position = CGPoint(x: size.width * 0.1, y: size.height * 1 / 7 + CGFloat(scene.yScaler)*size.height/2)
+        self.zPosition = 0
+        let width: Double = Double(size.width) * scene.xScaler
+        let height: Double = Double(size.height) * scene.yScaler
+        self.scale(to: CGSize(width: width, height: height))
+        scene.addChild(self)
+        
+        self.physicsBody = SKPhysicsBody(rectangleOf: self.size)
+        self.physicsBody?.isDynamic = true
+        //self.physicsBody?.linearDamping = 1
+        self.physicsBody?.allowsRotation = false
+        self.physicsBody?.restitution = 0
+        //self.physicsBody?.friction = 1
+        self.physicsBody?.usesPreciseCollisionDetection = true
+        self.physicsBody?.categoryBitMask = PhysicsCategory.Player
+        self.physicsBody?.contactTestBitMask = PhysicsCategory.ShootEnemy | PhysicsCategory.RamEnemy
+        self.physicsBody?.collisionBitMask = PhysicsCategory.Platform | PhysicsCategory.Barrier
+    }
+    
     func beginRunAnimation() {
         if doKickingAnimation {
             stopKickingAnimation()
