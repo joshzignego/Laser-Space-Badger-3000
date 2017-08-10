@@ -19,7 +19,7 @@ class MyPlayerNode: SKSpriteNode {
     var doJumpAnimation : Bool = false
     
     init() {
-        let texture = SKTexture(imageNamed: "Gun nakey badger RESIZE-1")
+        let texture = SKTexture(imageNamed: "Running FLANNEL-1")
         super.init(texture: texture, color: SKColor.clear, size: texture.size())
     }
     
@@ -55,7 +55,7 @@ class MyPlayerNode: SKSpriteNode {
         }
         doRunAnimation = true
         let textureAtlas = SKTextureAtlas(named: "Badger")
-        let frames = ["Gun nakey badger RESIZE-1", "Gun nakey badger RESIZE-2", "Gun nakey badger RESIZE-3", "Gun nakey badger RESIZE-4"].map { textureAtlas.textureNamed($0) }
+        let frames = ["Running FLANNEL-1", "Running FLANNEL-2", "Running FLANNEL-3", "Running FLANNEL-4"].map { textureAtlas.textureNamed($0) }
         let animate = SKAction.animate(with: frames, timePerFrame: 0.2)
         let forever = SKAction.repeatForever(animate)
         self.run(forever, withKey: "runningAnimation")
@@ -77,14 +77,30 @@ class MyPlayerNode: SKSpriteNode {
         }
         //print("Kick Animation")
         let textureAtlas = SKTextureAtlas(named: "Badger")
-        let frames = ["Kicking RESIZE-1", "Kicking RESIZE-2", "Kicking RESIZE-3", "Kicking RESIZE-4"].map { textureAtlas.textureNamed($0) }
+        let frames = ["Kicking FLANNEL-1", "Kicking FLANNEL-3", "Kicking FLANNEL-3"].map { textureAtlas.textureNamed($0) }
         let animate = SKAction.animate(with: frames, timePerFrame: 0.2)
         self.run(animate)
-        self.texture = SKTexture(imageNamed: "Kicking RESIZE-3")
+        self.texture = SKTexture(imageNamed: "Kicking FLANNEL-3")
     }
     
     func stopKickingAnimation() {
         doKickingAnimation = false
+    }
+    
+    func beginReverseKickAnimation() {
+        if doRunAnimation {
+            stopRunAnimation()
+        }
+        if doJumpAnimation {
+            doJumpAnimation = false
+        }
+        //print("Kick Animation")
+        doKickingAnimation = true
+        let textureAtlas = SKTextureAtlas(named: "Badger")
+        let frames = ["Reverse Kicking FLANNEL-1", "Reverse Kicking FLANNEL-3", "Reverse Kicking FLANNEL-3"].map { textureAtlas.textureNamed($0) }
+        let animate = SKAction.animate(with: frames, timePerFrame: 0.2)
+        self.run(animate)
+        self.texture = SKTexture(imageNamed: "Reverse Kicking FLANNEL-3")
     }
     
     func beginJumpAnimation() {
@@ -94,7 +110,7 @@ class MyPlayerNode: SKSpriteNode {
         if doRunAnimation {
             stopRunAnimation()
         }
-        self.texture = SKTexture(imageNamed: "Jumping RESIZE-1")
+        self.texture = SKTexture(imageNamed: "Jumping FLANNEL-1")
         doJumpAnimation = true
     }
     

@@ -1,0 +1,32 @@
+{
+  "images" : [
+    {
+      "resizing" : {
+        "mode" : "3-part-vertical",
+        "center" : {
+          "mode" : "tile",
+          "height" : 400
+        },
+        "cap-insets" : {
+          "top" : 0,
+          "bottom" : 0
+        }
+      },
+      "idiom" : "universal",
+      "filename" : "Jumping experiment2-1 (4).png",
+      "scale" : "1x"
+    },
+    {
+      "idiom" : "universal",
+      "scale" : "2x"
+    },
+    {
+      "idiom" : "universal",
+      "scale" : "3x"
+    }
+  ],
+  "info" : {
+    "version" : 1,
+    "author" : "xcode"
+  }
+}

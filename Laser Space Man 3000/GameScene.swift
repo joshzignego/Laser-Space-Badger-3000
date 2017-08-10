@@ -53,7 +53,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var spriteView = SKView()
     var player = MyPlayerNode()
     var ground = SKShapeNode()
-    let enemiesCanStillTakeHitsFromIcon = SKSpriteNode(imageNamed: "shootEnemy")
+    let enemiesCanStillTakeHitsFromIcon = SKSpriteNode(imageNamed: "Spider RESIZE-1")
     var enemyCounterWall = SKShapeNode()
     var bulletRemoverWall = SKShapeNode()
     var barrier = SKShapeNode()
@@ -88,6 +88,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var lastGroundSpawnTimeInterval : TimeInterval = 0
     var lastUpdateTimeInterval : TimeInterval = 0
     var runningFrames : [SKTexture]!
+    var ptu : CGFloat = 0
+    var jumpVector : CGFloat = 0
+    var areYouSureDisplayed : Bool = false
     
     
     //Swipes
@@ -104,8 +107,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         self.scaleMode = SKSceneScaleMode.resizeFill
         spriteView = self.view!
         physicsWorld.contactDelegate = self
-        
         initializePlayer()
+    
+        let body = SKPhysicsBody.init(rectangleOf: CGSize(width: 1, height: 1))
+        ptu = 1.0 / sqrt(body.mass)
+        let mass: CGFloat = (player.physicsBody?.mass)!
+        jumpVector = mass * sqrt(2 * -self.physicsWorld.gravity.dy * ((size.height*2/7 + 5) * ptu))
+        
         player.beginRunAnimation()
         makeEnemiesIcon()
         invisiwallsMaker()
@@ -434,6 +442,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // Rotate bullet so it's faces the proper direction
         let angle = atan2(direction.y, direction.x)
         bullet.zRotation += angle
+        bullet.zPosition += 20
         addChild(bullet)
         
         // Create the actions
@@ -582,27 +591,30 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func mainMenuButtonHit() {
-        makeAreYouSureButtons(type: "menu")
+        if areYouSureDisplayed {
+            return
+        }
+        makeAreYouSureButtons()
     }
     
     func areYouSure(value: Bool) {
-        if areYouSure_Yes.getButtonType() == "menu" && value {
+        if value {
             let reveal = SKTransition.flipHorizontal(withDuration: 0.5)
             let mainMenuScene = MainMenuScene(size: self.size)
             self.view?.presentScene(mainMenuScene, transition: reveal)
         }
-        if areYouSure_Yes.getButtonType() == "play again" && value {
-            let reveal = SKTransition.flipHorizontal(withDuration: 0.5)
-            let newGameScene = GameScene(size: self.size)
-            self.view?.presentScene(newGameScene, transition: reveal)
-        }
         
+        
+        areYouSureDisplayed = false
         areYouSureLabel.removeFromParent()
         areYouSure_Yes.removeFromParent()
         areYouSure_No.removeFromParent()
     }
     
     func pauseButtonHit() {
+        if areYouSureDisplayed {
+            return
+        }
         if self.speed == 1 {
             self.speed = 0
             physicsWorld.speed = 0
@@ -612,12 +624,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
         pauseButton.setLabelText(message: "Pause")
         mainMenuButton.removeFromParent()
+        areYouSure(value: false)
         self.speed = 1
         physicsWorld.speed = 1
         return
     }
     
-    func makeAreYouSureButtons(type: String) {
+    func makeAreYouSureButtons() {
+        areYouSureDisplayed = true
+        
         areYouSureLabel.text = "Are you sure?"
         areYouSureLabel.fontSize = 20
         areYouSureLabel.fontColor = SKColor.blue
@@ -628,7 +643,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         let path = CGRect.init(x: size.width*34/100, y: size.height*44/100, width: size.width*14/100, height: size.height*7/100)
         areYouSure_Yes = Button.init(rect: path, cornerRadius: 5)
-        areYouSure_Yes.setButtonType(type: type)
         areYouSure_Yes.strokeColor = UIColor.black
         areYouSure_Yes.fillColor = UIColor.white
         areYouSure_Yes.zPosition = 100
@@ -637,7 +651,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         let path2 = CGRect.init(x: size.width*0.50, y: size.height*44/100, width: size.width*14/100, height: size.height*7/100)
         areYouSure_No = Button.init(rect: path2, cornerRadius: 5)
-        areYouSure_No.setButtonType(type: type)
         areYouSure_No.strokeColor = UIColor.black
         areYouSure_No.fillColor = UIColor.white
         areYouSure_No.zPosition = 100
@@ -663,7 +676,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             return
         }
         if !player.isMoving(direction: "up") && !player.isMoving(direction: "down") {
-            player.beginKickAnimation()
+            player.beginReverseKickAnimation()
             player.setMoving(direction: "left", value: true)
             let vector = CGVector.init(dx: -size.width*0.05, dy: 0)
             player.physicsBody?.applyImpulse(vector)
@@ -673,7 +686,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     func jumpUp() {
         player.setMoving(direction: "up", value: true)
         player.beginJumpAnimation()
-        let vector = CGVector.init(dx: 0, dy: size.height*0.103)
+        let vector = CGVector.init(dx: 0, dy: jumpVector)
         player.physicsBody?.applyImpulse(vector)
     }
     
@@ -694,7 +707,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 }
             }
         }
-        let vector = CGVector.init(dx: 0, dy: -size.height * 0.103)
+        
+        let vector = CGVector.init(dx: 0, dy: -jumpVector)
         player.physicsBody?.applyImpulse(vector)
         
     }
