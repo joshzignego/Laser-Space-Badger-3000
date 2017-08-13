@@ -35,6 +35,11 @@ class GameOverScene: SKScene {
         let arraySize = array.count
         var index : Int = 0
         
+        
+        var totalScore = defaults.integer(forKey: "totalscore")
+        totalScore += score
+        defaults.set(totalScore, forKey: "totalscore")
+        
         //Add first score
         if arraySize == 0 {
             array.insert(score, at: 0)

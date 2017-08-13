@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		207A64B91F40F290001D5739 /* ButtonManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 207A64B81F40F290001D5739 /* ButtonManager.swift */; };
+		20863F511F3D4BDC006CFAF3 /* Powerup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20863F501F3D4BDC006CFAF3 /* Powerup.swift */; };
 		20CF4FD81F2FE83700C6D5DA /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20CF4FD71F2FE83700C6D5DA /* AppDelegate.swift */; };
 		20CF4FDE1F2FE83700C6D5DA /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20CF4FDD1F2FE83700C6D5DA /* GameScene.swift */; };
 		20CF4FE01F2FE83700C6D5DA /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20CF4FDF1F2FE83700C6D5DA /* GameViewController.swift */; };
@@ -41,6 +43,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		207A64B81F40F290001D5739 /* ButtonManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ButtonManager.swift; sourceTree = "<group>"; };
+		20863F501F3D4BDC006CFAF3 /* Powerup.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Powerup.swift; sourceTree = "<group>"; };
 		20CF4FD41F2FE83700C6D5DA /* Laser Space Man 3000.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Laser Space Man 3000.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		20CF4FD71F2FE83700C6D5DA /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		20CF4FDD1F2FE83700C6D5DA /* GameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScene.swift; sourceTree = "<group>"; };
@@ -118,12 +122,14 @@
 				20CF4FDF1F2FE83700C6D5DA /* GameViewController.swift */,
 				20DCEC6F1F33FE90004C607B /* MyPlayerNode.swift */,
 				20CF4FE11F2FE83700C6D5DA /* Main.storyboard */,
+				207A64B81F40F290001D5739 /* ButtonManager.swift */,
 				20CF4FE41F2FE83700C6D5DA /* Assets.xcassets */,
 				20E125851F31437100D17028 /* GameOverScene.swift */,
 				20CF4FE61F2FE83700C6D5DA /* LaunchScreen.storyboard */,
 				20E125871F31438A00D17028 /* MainMenuScene.swift */,
 				20CF4FE91F2FE83700C6D5DA /* Info.plist */,
 				20DCEC6B1F336AD0004C607B /* HighScores.swift */,
+				20863F501F3D4BDC006CFAF3 /* Powerup.swift */,
 			);
 			path = "Laser Space Man 3000";
 			sourceTree = "<group>";
@@ -291,10 +297,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				20E125881F31438A00D17028 /* MainMenuScene.swift in Sources */,
+				207A64B91F40F290001D5739 /* ButtonManager.swift in Sources */,
 				20DCEC701F33FE90004C607B /* MyPlayerNode.swift in Sources */,
 				20CF4FDE1F2FE83700C6D5DA /* GameScene.swift in Sources */,
 				20DCEC721F3691AD004C607B /* Button.swift in Sources */,
 				20CF4FE01F2FE83700C6D5DA /* GameViewController.swift in Sources */,
+				20863F511F3D4BDC006CFAF3 /* Powerup.swift in Sources */,
 				20E125861F31437100D17028 /* GameOverScene.swift in Sources */,
 				20DCEC6C1F336AD0004C607B /* HighScores.swift in Sources */,
 				20CF4FD81F2FE83700C6D5DA /* AppDelegate.swift in Sources */,

@@ -42,7 +42,15 @@ class HighScores: SKScene {
             height -= size.height * 0.05
         }
      
-        
+        var messageTotal = String("Total Score: ")
+        let totalScore : Int = userDefaults.integer(forKey: "totalscore")
+        messageTotal = messageTotal! + String(totalScore) 
+        let label = SKLabelNode(fontNamed: "Fipps-Regular")
+        label.text = messageTotal
+        label.fontSize = 10
+        label.fontColor = SKColor.red
+        label.position = CGPoint(x: size.width/3, y: size.height*75/100)
+        self.addChild(label)
         
    
         
@@ -61,18 +69,13 @@ class HighScores: SKScene {
         self.addChild(mainMenuButton)
     }
     
-    func newScore(score: Int) {
-        let userDefaults = UserDefaults.standard
-        userDefaults.setValue(score, forKey: "highscore")
-    }
-    
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         if let touch = touches.first {
             let pos = touch.location(in: self)
             let node = self.atPoint(pos)
             
          if node == mainMenuButton {
-                if let view = view {
+                if view != nil {
                     let transition:SKTransition = SKTransition.fade(withDuration: 1)
                     let scene:SKScene = MainMenuScene(size: self.size)
                     self.view?.presentScene(scene, transition: transition)
