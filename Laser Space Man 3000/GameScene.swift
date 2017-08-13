@@ -50,18 +50,16 @@ extension CGPoint {
 }
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
-    
-    //var spriteView = SKView()
     let buttonManager = ButtonManager()
     var player = MyPlayerNode()
     var ground = SKShapeNode()
-    let enemiesCanStillTakeHitsFromIcon = SKSpriteNode(imageNamed: "Spider RESIZE-1")
+    var enemiesCanStillTakeHitsFromIcon = SKSpriteNode()
     var enemyCounterWall = SKShapeNode()
     var bulletRemoverWall = SKShapeNode()
     var barrier = SKShapeNode()
     var pauseButton = Button()
     var mainMenuButton = Button()
-    var areYouSureLabel = SKLabelNode(fontNamed: "Fipps-Regular")
+    var areYouSureLabel = SKLabelNode()
     var areYouSure_Yes = Button()
     var areYouSure_No = Button()
     var scoreLabel = SKLabelNode()
@@ -75,9 +73,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     let segmentLength = 10 //# of platform segments/ size.width
     var enemiesCanStillTakeHitsFrom: Int = 0
     var enemiesPassed : Int = 0
-    let shootEmemyRate = 3   //0 means max enemies, higher numer means less enemies
-    let ramEnemyRate = 10
-    let powerupRate = 3
+    let shootEmemyRate = 5   //0 means max enemies, higher numer means less enemies
+    let ramEnemyRate = 5
+    let powerupRate = 100
     struct PlatformStruct {
         let platform : SKShapeNode
         let length : Double
@@ -86,16 +84,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     var platforms: [PlatformStruct] = []
     var doublePlatformPreventerArray: [Int] = [0,0,0,0]
-    var lastGroundSpawnTimeInterval : TimeInterval = 0
-    var lastUpdateTimeInterval : TimeInterval = 0
-    var runningFrames : [SKTexture]!
     var ptu : CGFloat = 0
     var jumpVector : CGFloat = 0
     var areYouSureDisplayed : Bool = false
     var invincible : Int = 0
     var speedBullets : Int = 0
-    
-    
     //Swipes
     let swipeRightRec = UISwipeGestureRecognizer()
     let swipeLeftRec = UISwipeGestureRecognizer()
@@ -108,25 +101,18 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         enemiesCanStillTakeHitsFrom = enemiesPassedToDie
         backgroundColor = SKColor.gray
         self.scaleMode = SKSceneScaleMode.resizeFill
-        //spriteView = self.view!
         physicsWorld.contactDelegate = self
         player.initializePlayer(gameScene: self)
-    
         let body = SKPhysicsBody.init(rectangleOf: CGSize(width: 1, height: 1))
         ptu = 1.0 / sqrt(body.mass)
         let mass: CGFloat = (player.physicsBody?.mass)!
         jumpVector = mass * sqrt(2 * -self.physicsWorld.gravity.dy * ((size.height*2/7 + 5) * ptu))
-        
         player.beginRunAnimation()
         makeButtons()
-        invisiwallsMaker()
         setUpSwipes()
-        makeScoreLabel()
         makeGround()
-        makeEnemiesCanStillTakeHitsFromLabel()
     
         run(SKAction.repeatForever(SKAction.sequence([SKAction.run(addPlatform), SKAction.run(addGroundMonster), SKAction.wait(forDuration: 1)  ])))
-        //run(SKAction.repeatForever(SKAction.sequence([SKAction.run(addGroundMonster), SKAction.wait(forDuration: 1)  ])))
     }
     
     override func update(_ currentTime: TimeInterval) {
@@ -177,6 +163,117 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
     }
     
+    // what gets called when there's a single tap...
+    //notice the sender is a parameter. This is why we added (_:) that part to the selector earlier
+    
+    func tappedView(_ sender:UITapGestureRecognizer) {
+        var point:CGPoint = sender.location(in: self.view)
+        point.y = size.height - point.y
+        
+        let node = self.atPoint(point)
+        if node == pauseButton || node == pauseButton.label {
+            pauseButtonHit()
+            return
+        }
+        if node == areYouSure_Yes || node == areYouSure_Yes.label {
+            areYouSure(value: true)
+            return
+        }
+        if node == areYouSure_No || node == areYouSure_No.label  {
+            areYouSure(value: false)
+            return
+        }
+        if node == mainMenuButton || node == mainMenuButton.label {
+            mainMenuButtonHit()
+            return
+        }
+        
+        if self.speed == 0 {
+            return
+        }
+        
+        if invincible > 0 {
+            return
+        }
+        
+        // Make bullet appropiate size
+        let width: Double = Double(size.width) * xScaler / 3 * 2
+        let height: Double = Double(size.height) * yScaler / 8
+        
+        // Set up initial location of projectile
+        var bullet = SKShapeNode()
+        let rectangle = CGRect.init(x: 0, y: 0, width: width, height: height)
+        bullet = SKShapeNode.init(rect: rectangle)
+        bullet.position = CGPoint(x: player.position.x, y: player.position.y)
+        
+        bullet.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: width, height: height), center: CGPoint(x: width/2, y: height/2))
+        
+        bullet.strokeColor = SKColor.black
+        bullet.fillColor = SKColor.orange
+        
+        
+        bullet.physicsBody?.isDynamic = true
+        bullet.physicsBody?.affectedByGravity = false
+        bullet.physicsBody?.categoryBitMask = PhysicsCategory.Bullet
+        bullet.physicsBody?.contactTestBitMask = PhysicsCategory.ShootEnemy | PhysicsCategory.BulletRemoverWall
+        bullet.physicsBody?.collisionBitMask = PhysicsCategory.None
+        bullet.physicsBody?.usesPreciseCollisionDetection = true
+        
+        // Determine offset of location to projectile
+        let offset = point - bullet.position
+        
+        // Get the direction of where to shoot
+        let direction = offset.normalized()
+        
+        // Make it shoot far enough to be guaranteed off screen
+        let shootAmount = direction * size.width
+        
+        // Add the shoot amount to the current position
+        let destination = shootAmount + bullet.position
+        
+        // Rotate bullet so it's faces the proper direction
+        let angle = atan2(direction.y, direction.x)
+        bullet.zRotation += angle
+        bullet.zPosition += 20
+        addChild(bullet)
+        
+        // Create the actions
+        
+        var actionMove = SKAction.move(to: destination, duration: 2.0)
+        if speedBullets > 0 {
+            bullet.fillColor = UIColor.blue
+            bullet.strokeColor = UIColor.blue
+            actionMove = SKAction.move(to: destination, duration: 1.0)
+        }
+        let actionMoveDone = SKAction.removeFromParent()
+        bullet.run(SKAction.sequence([actionMove, actionMoveDone]))
+    }
+    
+    func setUpSwipes() {
+        swipeRightRec.addTarget(self, action: #selector(moveRight) )
+        swipeRightRec.direction = .right
+        self.view!.addGestureRecognizer(swipeRightRec)
+        
+        swipeLeftRec.addTarget(self, action: #selector(moveLeft) )
+        swipeLeftRec.direction = .left
+        self.view!.addGestureRecognizer(swipeLeftRec)
+        
+        swipeUpRec.addTarget(self, action: #selector(jumpUp) )
+        swipeUpRec.direction = .up
+        self.view!.addGestureRecognizer(swipeUpRec)
+        
+        swipeDownRec.addTarget(self, action: #selector(jumpDown) )
+        swipeDownRec.direction = .down
+        self.view!.addGestureRecognizer(swipeDownRec)
+        
+        tapRec.addTarget(self, action:#selector(self.tappedView(_:) ))
+        tapRec.numberOfTouchesRequired = 1
+        tapRec.numberOfTapsRequired = 1
+        self.view!.addGestureRecognizer(tapRec)
+    }
+    
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    
     func makeGround() {
         let rectangle = CGRect.init(x: 0, y: 0, width: size.width, height: 2)
         ground = SKShapeNode.init(rect: rectangle)
@@ -220,15 +317,21 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             ramEnemy.run(SKAction.sequence([move, moveDone]))
         }
         else if randomPowerupNumber == 0 {
-            let powerup = addSpeedBullet(platform: ground, point: point)
+            let texture = SKTexture(imageNamed: "Lightning")
+            let powerup = Powerup.init(texture: texture, color: UIColor.clear, size: texture.size())
+            powerup.addPowerup(platform: ground, point: point, type: "speedBullets", gameScene: self)
             powerup.run(SKAction.sequence([move, moveDone]))
         }
         else if randomPowerupNumber == 1 {
-            let powerup = addBonusLives(platform: ground, point: point)
+            let texture = SKTexture(imageNamed: "Heart")
+            let powerup = Powerup.init(texture: texture, color: UIColor.clear, size: texture.size())
+            powerup.addPowerup(platform: ground, point: point, type: "bonusLives", gameScene: self)
             powerup.run(SKAction.sequence([move, moveDone]))
         }
         else if randomPowerupNumber == 2 {
-            let powerup = addInvincible(platform: ground, point: point)
+            let texture = SKTexture(imageNamed: "Spinach")
+            let powerup = Powerup.init(texture: texture, color: UIColor.clear, size: texture.size())
+            powerup.addPowerup(platform: ground, point: point, type: "invincible", gameScene: self)
             powerup.run(SKAction.sequence([move, moveDone]))
         }
     }
@@ -279,13 +382,19 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 addRamEnemy(platform: platform, point: point)
             }
             else if randomPowerupNumber == 0 {
-                addSpeedBullet(platform: platform, point: point)
+                let texture = SKTexture(imageNamed: "Lightning")
+                let powerup = Powerup.init(texture: texture, color: UIColor.clear, size: texture.size())
+                powerup.addPowerup(platform: platform, point: point, type: "speedBullets", gameScene: self)
             }
             else if randomPowerupNumber == 1 {
-                addBonusLives(platform: platform, point: point)
+                let texture = SKTexture(imageNamed: "Heart")
+                let powerup = Powerup.init(texture: texture, color: UIColor.clear, size: texture.size())
+                powerup.addPowerup(platform: platform, point: point, type: "bonusLives", gameScene: self)
             }
             else if randomPowerupNumber == 2 {
-                addInvincible(platform: platform, point: point)
+                let texture = SKTexture(imageNamed: "Spinach")
+                let powerup = Powerup.init(texture: texture, color: UIColor.clear, size: texture.size())
+                powerup.addPowerup(platform: platform, point: point, type: "invincible", gameScene: self)
             }
         }
         //Gap between platforms
@@ -380,278 +489,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         return ramEnemy
     }
     
-    // what gets called when there's a single tap...
-    //notice the sender is a parameter. This is why we added (_:) that part to the selector earlier
-    
-    func tappedView(_ sender:UITapGestureRecognizer) {
-        var point:CGPoint = sender.location(in: self.view)
-        point.y = size.height - point.y
-        
-        let node = self.atPoint(point)
-        if node == pauseButton || node == pauseButton.label {
-            pauseButtonHit()
-            return
-        }
-        if node == areYouSure_Yes || node == areYouSure_Yes.label {
-            areYouSure(value: true)
-            return
-        }
-        if node == areYouSure_No || node == areYouSure_No.label  {
-            areYouSure(value: false)
-            return
-        }
-        if node == mainMenuButton || node == mainMenuButton.label {
-            mainMenuButtonHit()
-            return
-        }
-        
-        if self.speed == 0 {
-            return
-        }
-        
-        // Make bullet appropiate size
-        let width: Double = Double(size.width) * xScaler / 3 * 2
-        let height: Double = Double(size.height) * yScaler / 8
-        
-        
-        
-        
-        /*
-        platform.position = CGPoint(x: size.width, y: CGFloat(platHeight))
-        platform.physicsBody = SKPhysicsBody.init(rectangleOf: CGSize(width: platLength, height: 2), center: CGPoint(x: CGFloat(platLength/2), y: 2))
-        */
-        // Set up initial location of projectile
-        var bullet = SKShapeNode()
-        let rectangle = CGRect.init(x: 0, y: 0, width: width, height: height)
-        bullet = SKShapeNode.init(rect: rectangle)
-        bullet.position = CGPoint(x: player.position.x, y: player.position.y)
-    
-        bullet.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: width, height: height), center: CGPoint(x: width/2, y: height/2))
-        
-        bullet.strokeColor = SKColor.black
-        bullet.fillColor = SKColor.orange
-        
-        
-        bullet.physicsBody?.isDynamic = true
-        bullet.physicsBody?.affectedByGravity = false
-        bullet.physicsBody?.categoryBitMask = PhysicsCategory.Bullet
-        bullet.physicsBody?.contactTestBitMask = PhysicsCategory.ShootEnemy | PhysicsCategory.BulletRemoverWall
-        bullet.physicsBody?.collisionBitMask = PhysicsCategory.None
-        bullet.physicsBody?.usesPreciseCollisionDetection = true
-        
-        // Determine offset of location to projectile
-        let offset = point - bullet.position
-        
-        // Get the direction of where to shoot
-        let direction = offset.normalized()
-        
-        // Make it shoot far enough to be guaranteed off screen
-        let shootAmount = direction * size.width
-        
-        // Add the shoot amount to the current position
-        let destination = shootAmount + bullet.position
-        
-        // Rotate bullet so it's faces the proper direction
-        let angle = atan2(direction.y, direction.x)
-        bullet.zRotation += angle
-        bullet.zPosition += 20
-        addChild(bullet)
-        
-        // Create the actions
-        
-        var actionMove = SKAction.move(to: destination, duration: 2.0)
-        if speedBullets > 0 {
-            bullet.fillColor = UIColor.blue
-            bullet.strokeColor = UIColor.blue
-            actionMove = SKAction.move(to: destination, duration: 1.0)
-        }
-        let actionMoveDone = SKAction.removeFromParent()
-        bullet.run(SKAction.sequence([actionMove, actionMoveDone]))
-    }
-    
-    func addSpeedBullet(platform: SKShapeNode, point: CGPoint)->Powerup {
-        let texture = SKTexture(imageNamed: "Lightning")
-        let speedBullet = Powerup.init(texture: texture, color: SKColor.clear, size: texture.size())
-        speedBullet.setType(type: "speedBullet")
-        speedBullet.position = point
-        speedBullet.anchorPoint = CGPoint(x: 0, y: 0)
-        let width: Double = Double(size.width) * xScaler
-        let height: Double = Double(size.height) * yScaler
-        speedBullet.scale(to: CGSize(width: width, height: height))
-        platform.addChild(speedBullet)
-        
-        speedBullet.physicsBody = SKPhysicsBody(rectangleOf: speedBullet.size, center: CGPoint(x: width/2, y: height/2))
-        speedBullet.physicsBody?.isDynamic = true
-        speedBullet.physicsBody?.categoryBitMask = PhysicsCategory.Powerup
-        speedBullet.physicsBody?.affectedByGravity = false
-        speedBullet.physicsBody?.linearDamping = 0
-        speedBullet.physicsBody?.allowsRotation = false
-        speedBullet.physicsBody?.friction = 0
-        speedBullet.physicsBody?.contactTestBitMask = PhysicsCategory.Player
-        speedBullet.physicsBody?.collisionBitMask = PhysicsCategory.None
-        
-        return speedBullet
-    }
-    
-    func addInvincible(platform: SKShapeNode, point: CGPoint)->Powerup {
-        let texture = SKTexture(imageNamed: "Spinach")
-        let invincible = Powerup.init(texture: texture, color: SKColor.clear, size: texture.size())
-        invincible.setType(type: "invincible")
-        invincible.position = point
-        invincible.anchorPoint = CGPoint(x: 0, y: 0)
-        let width: Double = Double(size.width) * xScaler
-        let height: Double = Double(size.height) * yScaler
-        invincible.scale(to: CGSize(width: width, height: height))
-        platform.addChild(invincible)
-        
-        invincible.physicsBody = SKPhysicsBody(rectangleOf: invincible.size, center: CGPoint(x: width/2, y: height/2))
-        invincible.physicsBody?.isDynamic = true
-        invincible.physicsBody?.categoryBitMask = PhysicsCategory.Powerup
-        invincible.physicsBody?.affectedByGravity = false
-        invincible.physicsBody?.linearDamping = 0
-        invincible.physicsBody?.allowsRotation = false
-        invincible.physicsBody?.friction = 0
-        invincible.physicsBody?.contactTestBitMask = PhysicsCategory.Player
-        invincible.physicsBody?.collisionBitMask = PhysicsCategory.None
-        
-        return invincible
-    }
-    
-    func addBonusLives(platform: SKShapeNode, point: CGPoint)->Powerup {
-        let texture = SKTexture(imageNamed: "Heart")
-        let bonusLives = Powerup.init(texture: texture, color: SKColor.clear, size: texture.size())
-        bonusLives.setType(type: "bonusLives")
-        bonusLives.position = point
-        bonusLives.anchorPoint = CGPoint(x: 0, y: 0)
-        let width: Double = Double(size.width) * xScaler
-        let height: Double = Double(size.height) * yScaler
-        bonusLives.scale(to: CGSize(width: width, height: height))
-        platform.addChild(bonusLives)
-        
-        bonusLives.physicsBody = SKPhysicsBody(rectangleOf: bonusLives.size, center: CGPoint(x: width/2, y: height/2))
-        bonusLives.physicsBody?.isDynamic = true
-        bonusLives.physicsBody?.categoryBitMask = PhysicsCategory.Powerup
-        bonusLives.physicsBody?.affectedByGravity = false
-        bonusLives.physicsBody?.linearDamping = 0
-        bonusLives.physicsBody?.allowsRotation = false
-        bonusLives.physicsBody?.friction = 0
-        bonusLives.physicsBody?.contactTestBitMask = PhysicsCategory.Player
-        bonusLives.physicsBody?.collisionBitMask = PhysicsCategory.None
-        return bonusLives
-    }
-    
-    func playerDidCollideWithRamEnemy(ramEnemy: SKSpriteNode) {
-        if invincible > 0 {
-            score += 1
-            updateScore()
-            ramEnemy.removeFromParent()
-            return
-        }
-        if player.isMoving(direction: "up") || player.isMoving(direction: "down") ||
-            player.isMoving(direction: "right") || player.isMoving(direction: "left") {
-            score += 1
-            updateScore()
-            ramEnemy.removeFromParent()
-        }
-        else {
-            gameOver()
-        }
-    }
-
-    func bulletDidCollideWithEnemy(bullet: SKShapeNode, enemy: SKSpriteNode, type: String) {
-        if type == "shoot" {
-            score += 1
-            updateScore()
-            enemy.removeFromParent()
-        }
-        bullet.removeFromParent()
-    }
-    
-    func enemyCollideWithEnemyCounterWall() {
-        enemiesCanStillTakeHitsFrom -= 1
-        updateEnemiesCanStillTakeHitsFromLabel()
-        if enemiesCanStillTakeHitsFrom <= 0 {
-            gameOver()
-        }
-    }
-    
-    func bulletCollideWithBulletRemoverWall(node: SKNode) {
-        node.physicsBody?.categoryBitMask = PhysicsCategory.None
-        node.physicsBody?.contactTestBitMask = PhysicsCategory.None
-    }
-    
-    func playerDidCollideWithPowerup(powerup: Powerup) {
-        if powerup.getType() == "speedBullet" {
-            self.speedBullets += 1
-            self.run(SKAction.sequence([SKAction.wait(forDuration: 10),
-                SKAction.run({  self.speedBullets -= 1 })]))
-        }
-        else if powerup.getType() == "invincible" {
-            if self.invincible == 0 || self.invincible == 1 {
-                self.run(SKAction.sequence([SKAction.wait(forDuration: 0.5), SKAction.run(scale1), SKAction.wait(forDuration: 0.5), SKAction.run(scale2), SKAction.wait(forDuration: 0.5), SKAction.run(scale3)]))
-            }
-            self.invincible += 10
-            self.run(SKAction.sequence([SKAction.wait(forDuration: 9), SKAction.run({  self.invincible -= 9 }), SKAction.wait(forDuration: 1), SKAction.run({  self.invincible -= 1 })]))
-        } else {
-            enemiesCanStillTakeHitsFrom += 10
-            updateEnemiesCanStillTakeHitsFromLabel()
-        }
-        player.beginTearingAnimation()
-        powerup.removeFromParent()
-    }
-    func scale1() {self.player.scale(to: CGSize(width: size.width*CGFloat(xScaler)*1.05, height: size.height*CGFloat(yScaler)*1.06))}
-    func scale2() {self.player.scale(to: CGSize(width: size.width*CGFloat(xScaler)*1.11, height: size.height*CGFloat(yScaler)*1.12))}
-    func scale3() {self.player.scale(to: CGSize(width: size.width*CGFloat(xScaler)*1.16, height: size.height*CGFloat(yScaler)*1.16))}
-    
-    func gameOver() {
-        let reveal = SKTransition.flipHorizontal(withDuration: 0.5)
-        let gameOverScene = GameOverScene(size: self.size, score: score)
-        self.view?.presentScene(gameOverScene, transition: reveal)
-    }
-    
-    func makeEnemiesCanStillTakeHitsFromLabel() {
-        enemiesCanStillTakeHitsFromLabel = SKLabelNode(fontNamed: "Fipps-Regular")
-        enemiesCanStillTakeHitsFromLabel.text = String(enemiesCanStillTakeHitsFrom)
-        enemiesCanStillTakeHitsFromLabel.fontSize = 25
-        enemiesCanStillTakeHitsFromLabel.fontColor = SKColor.red
-        enemiesCanStillTakeHitsFromLabel.position = CGPoint(x: size.width*15/100, y: size.height*88/100)
-        enemiesCanStillTakeHitsFromLabel.zPosition += 100
-        addChild(enemiesCanStillTakeHitsFromLabel)
-    }
-    
-    func makeScoreLabel() {
-        scoreLabel = SKLabelNode(fontNamed: "Fipps-Regular")
-        scoreLabel.text = String(score)
-        scoreLabel.fontSize = 25
-        scoreLabel.fontColor = SKColor.yellow
-        scoreLabel.position = CGPoint(x: size.width*93/100, y: size.height*88/100)
-        scoreLabel.zPosition += 100
-        addChild(scoreLabel)
-    }
-    
-    func setUpSwipes() {
-        swipeRightRec.addTarget(self, action: #selector(moveRight) )
-        swipeRightRec.direction = .right
-        self.view!.addGestureRecognizer(swipeRightRec)
-        
-        swipeLeftRec.addTarget(self, action: #selector(moveLeft) )
-        swipeLeftRec.direction = .left
-        self.view!.addGestureRecognizer(swipeLeftRec)
-        
-        swipeUpRec.addTarget(self, action: #selector(jumpUp) )
-        swipeUpRec.direction = .up
-        self.view!.addGestureRecognizer(swipeUpRec)
-        
-        swipeDownRec.addTarget(self, action: #selector(jumpDown) )
-        swipeDownRec.direction = .down
-        self.view!.addGestureRecognizer(swipeDownRec)
-        
-        tapRec.addTarget(self, action:#selector(self.tappedView(_:) ))
-        tapRec.numberOfTouchesRequired = 1
-        tapRec.numberOfTapsRequired = 1
-        self.view!.addGestureRecognizer(tapRec)
-    }
-    
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     func updateEnemiesCanStillTakeHitsFromLabel() {
         enemiesCanStillTakeHitsFromLabel.text = String(enemiesCanStillTakeHitsFrom)
     }
@@ -662,14 +500,21 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     func makeButtons() {
         pauseButton = buttonManager.makePauseButton(gameScene: self)
-        buttonManager.makeEnemiesIcon(icon: enemiesCanStillTakeHitsFromIcon, gameScene: self)
+        enemiesCanStillTakeHitsFromIcon = buttonManager.makeEnemiesIcon(gameScene: self)
+        bulletRemoverWall = buttonManager.makeBulletRemoverWall(gameScene: self)
+        enemyCounterWall = buttonManager.makeEnemyCounterWall(gameScene: self)
+        barrier = buttonManager.makeBarrier(gameScene: self)
+        scoreLabel = buttonManager.makeScoreLabel(gameScene: self)
+        enemiesCanStillTakeHitsFromLabel = buttonManager.makeEnemiesCanStillTakeHitsFromLabel(gameScene: self)
     }
     
     func mainMenuButtonHit() {
         if areYouSureDisplayed {
             return
         }
-        makeAreYouSureButtons()
+        areYouSureLabel = buttonManager.makeAreYouSureLabel(gameScene: self)
+        areYouSure_Yes = buttonManager.makeAreYouSureYes(gameScene: self)
+        areYouSure_No = buttonManager.makeAreYouSureNo(gameScene: self)
     }
     
     func areYouSure(value: Bool) {
@@ -678,7 +523,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             let mainMenuScene = MainMenuScene(size: self.size)
             self.view?.presentScene(mainMenuScene, transition: reveal)
         }
-        
         
         areYouSureDisplayed = false
         areYouSureLabel.removeFromParent()
@@ -705,11 +549,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         return
     }
     
-    func makeAreYouSureButtons() {
-        areYouSureLabel = buttonManager.makeAreYouSureLabel(gameScene: self)
-        areYouSure_Yes = buttonManager.makeAreYouSureYes(gameScene: self)
-        areYouSure_No = buttonManager.makeAreYouSureNo(gameScene: self)
+    func gameOver() {
+        let reveal = SKTransition.flipHorizontal(withDuration: 0.5)
+        let gameOverScene = GameOverScene(size: self.size, score: score)
+        self.view?.presentScene(gameOverScene, transition: reveal)
     }
+    
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         
     func moveRight() {
         if self.speed == 0 {
@@ -780,41 +626,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
     }
     
-    func invisiwallsMaker() {
-        //barrier
-        let rectangle3 = CGRect.init(x: 0, y: 0, width: size.width, height: size.height*6/7)
-        barrier = SKShapeNode.init(rect: rectangle3)
-        barrier.physicsBody = SKPhysicsBody(edgeLoopFrom: rectangle3)
-        barrier.strokeColor = SKColor.clear
-        barrier.physicsBody?.isDynamic = false
-        barrier.physicsBody?.restitution = 0
-        barrier.physicsBody?.categoryBitMask = PhysicsCategory.Barrier
-        barrier.physicsBody?.contactTestBitMask = PhysicsCategory.None
-        barrier.physicsBody?.collisionBitMask = PhysicsCategory.Player
-        addChild(barrier)
-        
-        //enemyCounterWall
-        let rectangle = CGRect.init(x: 0, y: 0, width: 2, height: Double(size.height))
-        enemyCounterWall = SKShapeNode.init(rect: rectangle)
-        enemyCounterWall.position = CGPoint(x: -xScaler*Double(size.width)-1, y: Double(size.height)/2)
-        enemyCounterWall.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: 2, height: size.height))
-        enemyCounterWall.physicsBody?.isDynamic = false
-        enemyCounterWall.physicsBody?.categoryBitMask = PhysicsCategory.EnemyCounterWall
-        enemyCounterWall.physicsBody?.contactTestBitMask = PhysicsCategory.ShootEnemy | PhysicsCategory.RamEnemy
-        enemyCounterWall.physicsBody?.collisionBitMask = PhysicsCategory.None
-        addChild(enemyCounterWall)
-        
-        //bulletRemoverWall
-        //let rectangle2 = CGRect.init(x: 0, y: 0, width: 2, height: Double(size.height))
-        bulletRemoverWall = SKShapeNode.init(rect: rectangle)
-        bulletRemoverWall.position = CGPoint(x: size.width + 1, y: size.height/2)
-        bulletRemoverWall.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: 2, height: size.height))
-        bulletRemoverWall.physicsBody?.isDynamic = false
-        bulletRemoverWall.physicsBody?.categoryBitMask = PhysicsCategory.BulletRemoverWall
-        bulletRemoverWall.physicsBody?.contactTestBitMask = PhysicsCategory.Bullet
-        bulletRemoverWall.physicsBody?.collisionBitMask = PhysicsCategory.None
-        addChild(bulletRemoverWall)
-    }
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
     func playerDidCollideWithShootEnemy(shootEnemy: SKSpriteNode) {
         if invincible > 0 {
@@ -825,6 +637,70 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
         gameOver()
     }
+    
+    func playerDidCollideWithRamEnemy(ramEnemy: SKSpriteNode) {
+        if invincible > 0 {
+            score += 1
+            updateScore()
+            ramEnemy.removeFromParent()
+            return
+        }
+        if player.isMoving(direction: "up") || player.isMoving(direction: "down") ||
+            player.isMoving(direction: "right") || player.isMoving(direction: "left") {
+            score += 1
+            updateScore()
+            ramEnemy.removeFromParent()
+        }
+        else {
+            gameOver()
+        }
+    }
+    
+    func bulletDidCollideWithEnemy(bullet: SKShapeNode, enemy: SKSpriteNode, type: String) {
+        if type == "shoot" {
+            score += 1
+            updateScore()
+            enemy.removeFromParent()
+        }
+        bullet.removeFromParent()
+    }
+    
+    func enemyCollideWithEnemyCounterWall() {
+        enemiesCanStillTakeHitsFrom -= 1
+        updateEnemiesCanStillTakeHitsFromLabel()
+        if enemiesCanStillTakeHitsFrom <= 0 {
+            gameOver()
+        }
+    }
+    
+    func bulletCollideWithBulletRemoverWall(node: SKNode) {
+        node.physicsBody?.categoryBitMask = PhysicsCategory.None
+        node.physicsBody?.contactTestBitMask = PhysicsCategory.None
+    }
+    
+    func playerDidCollideWithPowerup(powerup: Powerup) {
+        if powerup.getType() == "speedBullet" {
+            self.speedBullets += 1
+            self.run(SKAction.sequence([SKAction.wait(forDuration: 10),
+                                        SKAction.run({  self.speedBullets -= 1 })]))
+        }
+        else if powerup.getType() == "invincible" {
+            if self.invincible == 0 || self.invincible == 1 {
+                self.run(SKAction.sequence([SKAction.wait(forDuration: 0.5), SKAction.run(scale1), SKAction.wait(forDuration: 0.5), SKAction.run(scale2), SKAction.wait(forDuration: 0.5), SKAction.run(scale3)]))
+            }
+            self.invincible += 10
+            self.run(SKAction.sequence([SKAction.wait(forDuration: 9), SKAction.run({  self.invincible -= 9 }), SKAction.wait(forDuration: 1), SKAction.run({  self.invincible -= 1 })]))
+        } else {
+            enemiesCanStillTakeHitsFrom += 10
+            updateEnemiesCanStillTakeHitsFromLabel()
+        }
+        player.beginTearingAnimation()
+        powerup.removeFromParent()
+    }
+    
+    func scale1() {self.player.scale(to: CGSize(width: size.width*CGFloat(xScaler)*1.05, height: size.height*CGFloat(yScaler)*1.06))}
+    func scale2() {self.player.scale(to: CGSize(width: size.width*CGFloat(xScaler)*1.11, height: size.height*CGFloat(yScaler)*1.12))}
+    func scale3() {self.player.scale(to: CGSize(width: size.width*CGFloat(xScaler)*1.16, height: size.height*CGFloat(yScaler)*1.16))}
     
     func didBegin(_ contact: SKPhysicsContact) {
         
@@ -898,26 +774,5 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 bulletCollideWithBulletRemoverWall(node: firstBody.node!)
             }
         }
-    }
- 
-    //Should go in playernode eventually
-    func initializePlayer() {
-        player.position = CGPoint(x: size.width * 0.1, y: size.height * 1 / 7 + CGFloat(yScaler)*size.height/2)
-        player.zPosition = 0
-        let width: Double = Double(size.width) * xScaler
-        let height: Double = Double(size.height) * yScaler
-        player.scale(to: CGSize(width: width, height: height))
-        addChild(player)
-        
-        player.physicsBody = SKPhysicsBody(rectangleOf: player.size)
-        player.physicsBody?.isDynamic = true
-        //player.physicsBody?.linearDamping = 1
-        player.physicsBody?.allowsRotation = false
-        player.physicsBody?.restitution = 0
-        //player.physicsBody?.friction = 1
-        player.physicsBody?.usesPreciseCollisionDetection = true
-        player.physicsBody?.categoryBitMask = PhysicsCategory.Player
-        player.physicsBody?.contactTestBitMask = PhysicsCategory.ShootEnemy | PhysicsCategory.RamEnemy | PhysicsCategory.Powerup
-        player.physicsBody?.collisionBitMask = PhysicsCategory.Platform | PhysicsCategory.Barrier
     }
 }

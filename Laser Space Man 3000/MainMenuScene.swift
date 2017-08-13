@@ -25,7 +25,6 @@ class MainMenuScene: SKScene {
         label.text = message
         label.fontSize = 40
         label.fontColor = SKColor.blue
-        label.position = CGPoint(x: size.width/2, y: size.height*32/100)
         addChild(label)
         
         let message2 = "High Scores"
@@ -33,7 +32,6 @@ class MainMenuScene: SKScene {
         label2.text = message2
         label2.fontSize = 40
         label2.fontColor = SKColor.blue
-        label2.position = CGPoint(x: size.width/2, y: size.height*5/100)
         addChild(label2)
         
         // Try as a shape
@@ -47,15 +45,28 @@ class MainMenuScene: SKScene {
         hsButton.strokeColor = UIColor.black
         addChild(hsButton)
         
-        
-        
         let titleMessage = "Laser Space Man 3000"
         let title = SKLabelNode(fontNamed: "Fipps-Regular")
         title.text = titleMessage
         title.fontSize = 40
         title.fontColor = SKColor.blue
-        title.position = CGPoint(x: size.width/2, y: size.height*66/100)
         addChild(title)
+        
+        
+        adjustLabelFontSizeToFitRect(labelNode: label, rect: path)
+        adjustLabelFontSizeToFitRect(labelNode: label2, rect: path2)
+        adjustLabelFontSizeToFitRect(labelNode: title, rect: CGRect.init(x: Double(size.width/10), y: Double(size.height*2/3), width: Double(size.width*8/10), height: Double(size.height/4)))
+    }
+    
+    func adjustLabelFontSizeToFitRect(labelNode: SKLabelNode, rect:CGRect) {
+        // Determine the font scaling factor that should let the label text fit in the given rectangle.
+        let scalingFactor = min(rect.width / labelNode.frame.width, rect.height / labelNode.frame.height)
+        
+        // Change the fontSize.
+        labelNode.fontSize *= scalingFactor
+        
+        // Optionally move the SKLabelNode to the center of the rectangle.
+        labelNode.position = CGPoint(x: rect.midX, y: rect.midY - labelNode.frame.height / 2.0)
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {

@@ -9,7 +9,7 @@
 import Foundation
 import SpriteKit
 
-class ButtonManager : SKShapeNode {
+class ButtonManager {
     
     func makePauseButton(gameScene: GameScene)->Button {
         let path = CGRect.init(x: gameScene.size.width*1/100, y: gameScene.size.height*35/1000, width: gameScene.size.width*14/100, height: gameScene.size.height*7/100)
@@ -23,7 +23,20 @@ class ButtonManager : SKShapeNode {
         return pauseButton
     }
     
-    func makeEnemiesIcon(icon: SKSpriteNode, gameScene: GameScene) {
+    func makeEnemiesCanStillTakeHitsFromLabel(gameScene: GameScene)->SKLabelNode {
+        let enemiesCanStillTakeHitsFromLabel = SKLabelNode(fontNamed: "Fipps-Regular")
+        enemiesCanStillTakeHitsFromLabel.text = String(gameScene.enemiesPassedToDie)
+        enemiesCanStillTakeHitsFromLabel.fontSize = 25
+        enemiesCanStillTakeHitsFromLabel.fontColor = SKColor.red
+        enemiesCanStillTakeHitsFromLabel.position = CGPoint(x: gameScene.size.width*15/100, y: gameScene.size.height*88/100)
+        enemiesCanStillTakeHitsFromLabel.zPosition += 100
+        gameScene.addChild(enemiesCanStillTakeHitsFromLabel)
+        
+        return enemiesCanStillTakeHitsFromLabel
+    }
+    
+    func makeEnemiesIcon(gameScene: GameScene)->SKSpriteNode {
+        let icon = SKSpriteNode(imageNamed: "Spider RESIZE-1")
         icon.anchorPoint = CGPoint(x: 0, y: 0)
         icon.position = CGPoint(x: gameScene.size.width * 0.05, y: gameScene.size.height * 0.88)
         icon.zPosition += 50
@@ -31,6 +44,8 @@ class ButtonManager : SKShapeNode {
         let height: Double = Double(gameScene.size.height) * gameScene.yScaler
         icon.scale(to: CGSize(width: width, height: height))
         gameScene.addChild(icon)
+        
+        return icon
     }
  
     func makeMainMenuButton(gameScene: GameScene)->Button {
@@ -82,5 +97,59 @@ class ButtonManager : SKShapeNode {
         
         return areYouSure_No
     }
-
+    
+    func makeBarrier(gameScene: GameScene)->SKShapeNode {
+        let rectangle = CGRect.init(x: 0, y: 0, width: gameScene.size.width, height: gameScene.size.height*88/100)
+        let barrier = SKShapeNode.init(rect: rectangle)
+        barrier.physicsBody = SKPhysicsBody(edgeLoopFrom: rectangle)
+        barrier.strokeColor = SKColor.clear
+        barrier.physicsBody?.isDynamic = false
+        barrier.physicsBody?.restitution = 0
+        barrier.physicsBody?.categoryBitMask = PhysicsCategory.Barrier
+        barrier.physicsBody?.contactTestBitMask = PhysicsCategory.None
+        barrier.physicsBody?.collisionBitMask = PhysicsCategory.Player
+        gameScene.addChild(barrier)
+        
+        return barrier
+    }
+    
+    func makeEnemyCounterWall(gameScene: GameScene)->SKShapeNode {
+        let rectangle = CGRect.init(x: 0, y: 0, width: 2, height: Double(gameScene.size.height))
+        let enemyCounterWall = SKShapeNode.init(rect: rectangle)
+        enemyCounterWall.position = CGPoint(x: -gameScene.xScaler*Double(gameScene.size.width)-1, y: Double(gameScene.size.height)/2)
+        enemyCounterWall.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: 2, height: gameScene.size.height))
+        enemyCounterWall.physicsBody?.isDynamic = false
+        enemyCounterWall.physicsBody?.categoryBitMask = PhysicsCategory.EnemyCounterWall
+        enemyCounterWall.physicsBody?.contactTestBitMask = PhysicsCategory.ShootEnemy | PhysicsCategory.RamEnemy
+        enemyCounterWall.physicsBody?.collisionBitMask = PhysicsCategory.None
+        gameScene.addChild(enemyCounterWall)
+        
+        return enemyCounterWall
+    }
+    
+    func makeBulletRemoverWall(gameScene: GameScene)->SKShapeNode {
+        let rectangle = CGRect.init(x: 0, y: 0, width: 2, height: Double(gameScene.size.height))
+        let bulletRemoverWall = SKShapeNode.init(rect: rectangle)
+        bulletRemoverWall.position = CGPoint(x: gameScene.size.width + 1, y: gameScene.size.height/2)
+        bulletRemoverWall.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: 2, height: gameScene.size.height))
+        bulletRemoverWall.physicsBody?.isDynamic = false
+        bulletRemoverWall.physicsBody?.categoryBitMask = PhysicsCategory.BulletRemoverWall
+        bulletRemoverWall.physicsBody?.contactTestBitMask = PhysicsCategory.Bullet
+        bulletRemoverWall.physicsBody?.collisionBitMask = PhysicsCategory.None
+        gameScene.addChild(bulletRemoverWall)
+        
+        return bulletRemoverWall
+    }
+    
+    func makeScoreLabel(gameScene: GameScene)->SKLabelNode {
+        let scoreLabel = SKLabelNode(fontNamed: "Fipps-Regular")
+        scoreLabel.text = String(0)
+        scoreLabel.fontSize = 25
+        scoreLabel.fontColor = SKColor.yellow
+        scoreLabel.position = CGPoint(x: gameScene.size.width*93/100, y: gameScene.size.height*88/100)
+        scoreLabel.zPosition += 100
+        gameScene.addChild(scoreLabel)
+        
+        return scoreLabel
+    }
 }

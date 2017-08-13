@@ -19,9 +19,7 @@ class Button : SKShapeNode {
         label.position = position
         label.zPosition = zPosition
         addChild(label)
-        
     }
-    
     
     func setLabelText(message: String) {
         label.text = message
