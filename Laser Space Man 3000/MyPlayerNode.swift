@@ -17,7 +17,7 @@ class MyPlayerNode: SKSpriteNode {
     var doRunAnimation : Bool = false
     var doKickingAnimation : Bool = false
     var doJumpAnimation : Bool = false
-    var doTearingAnimation : Bool = false
+    var doPowerupAnimation : Bool = false
     var doPuttingOnAnimation : Bool = false
     var shirtless : Bool = false
     
@@ -47,7 +47,7 @@ class MyPlayerNode: SKSpriteNode {
     }
     
     func beginRunAnimation() {
-        if doTearingAnimation {
+        if doPowerupAnimation {
             return
         }
         if doPuttingOnAnimation {
@@ -84,7 +84,7 @@ class MyPlayerNode: SKSpriteNode {
     }
     
     func beginKickAnimation() {
-        if doTearingAnimation {
+        if doPowerupAnimation {
             return
         }
         if doPuttingOnAnimation {
@@ -119,7 +119,7 @@ class MyPlayerNode: SKSpriteNode {
     }
     
     func beginReverseKickAnimation() {
-        if doTearingAnimation {
+        if doPowerupAnimation {
             return
         }
         if doPuttingOnAnimation {
@@ -151,7 +151,7 @@ class MyPlayerNode: SKSpriteNode {
     }
     
     func beginJumpAnimation() {
-        if doTearingAnimation {
+        if doPowerupAnimation {
             return
         }
         if doPuttingOnAnimation {
@@ -176,13 +176,12 @@ class MyPlayerNode: SKSpriteNode {
         doJumpAnimation = false
     }
     
-    func beginTearingAnimation() {
+    func beginPowerupAnimation(type: String) {
         if shirtless {
             return
         }
-        doTearingAnimation = true
-        doPuttingOnAnimation = false
-        shirtless = true
+        doPowerupAnimation = true
+        
         if doKickingAnimation {
             stopKickingAnimation()
         }
@@ -193,16 +192,34 @@ class MyPlayerNode: SKSpriteNode {
             stopJumpAnimation()
         }
         
-        let textureAtlas = SKTextureAtlas(named: "Badger")
-        let frames = ["Tear 1", "Tear 2", "Tear 3", "Tear 4", "Tear 5", "Tear 6", "Tear 7", "Tear 8", "Tear 9", "Tear 10", "Tear 11", "Tear 12"].map { textureAtlas.textureNamed($0) }
-        let animate = SKAction.animate(with: frames, timePerFrame: 0.2)
+        if type == "tear" {
+            doPuttingOnAnimation = false
+            shirtless = true
+            let textureAtlas = SKTextureAtlas(named: "Badger")
+            let frames = ["Tear 1", "Tear 2", "Tear 3", "Tear 4", "Tear 5", "Tear 6", "Tear 7", "Tear 8", "Tear 9", "Tear 10", "Tear 11", "Tear 12"].map { textureAtlas.textureNamed($0) }
+            let animate = SKAction.animate(with: frames, timePerFrame: 0.2)
         
-        self.run(SKAction.sequence([animate, SKAction.run(stopTearingAnimation)]))
+            self.run(SKAction.sequence([animate, SKAction.run(stopPowerupAnimation)]))
+        } else if type == "flip" {
+            let textureAtlas = SKTextureAtlas(named: "Badger")
+            let frames = ["Flip 1", "Flip 2", "Flip 3", "Flip 4"].map { textureAtlas.textureNamed($0) }
+            let animate = SKAction.animate(with: frames, timePerFrame: 0.2)
+            
+            self.run(SKAction.sequence([animate, SKAction.run(stopPowerupAnimation)]))
+        } else if type == "lightning" {
+            
+            let textureAtlas = SKTextureAtlas(named: "Badger")
+            let frames = ["Lightning 1", "Lightning 2", "Lightning 3", "Lightning 4"].map { textureAtlas.textureNamed($0) }
+            let animate = SKAction.animate(with: frames, timePerFrame: 0.2)
+            
+            self.run(SKAction.sequence([animate, SKAction.run(stopPowerupAnimation)]))
+        }
     }
     
-    func stopTearingAnimation() {
-        doTearingAnimation = false
+    func stopPowerupAnimation() {
+        doPowerupAnimation = false
     }
+    
     
     func putShirtOn() {
         stopRunAnimation()

@@ -10,7 +10,7 @@ import Foundation
 import SpriteKit
 
 class Powerup: SKSpriteNode {
-    var speedBullet = false
+    var speedBullets = false
     var invincibility = false
     var bonusLives = false
     
@@ -55,20 +55,20 @@ class Powerup: SKSpriteNode {
     }
     
     func setType(type: String) {
-        if type == "speedBullet" {
-            speedBullet = true
+        if type == "speedBullets" {
+            speedBullets = true
         }
         if type == "invincible" {
             invincibility = true
         }
         if type == "bonusLives" {
-            speedBullet = bonusLives
+             bonusLives = true
         }
     }
     
     func getType()->String {
-        if speedBullet {
-            return "speedBullet"
+        if speedBullets {
+            return "speedBullets"
         }
         else if invincibility {
             return "invincible"

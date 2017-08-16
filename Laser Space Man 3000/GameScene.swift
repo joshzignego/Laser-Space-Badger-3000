@@ -112,6 +112,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         setUpSwipes()
         makeGround()
     
+        let sky = SKSpriteNode(imageNamed: "Sky")
+        sky.position = CGPoint(x: size.width/2, y: size.height/2)
+        sky.scale(to: CGSize(width: size.width, height: size.height))
+        sky.zPosition = -1
+        addChild(sky)
+        
         run(SKAction.repeatForever(SKAction.sequence([SKAction.run(addPlatform), SKAction.run(addGroundMonster), SKAction.wait(forDuration: 1)  ])))
     }
     
@@ -329,7 +335,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             powerup.run(SKAction.sequence([move, moveDone]))
         }
         else if randomPowerupNumber == 2 {
-            let texture = SKTexture(imageNamed: "Spinach")
+            let texture = SKTexture(imageNamed: "Kale")
             let powerup = Powerup.init(texture: texture, color: UIColor.clear, size: texture.size())
             powerup.addPowerup(platform: ground, point: point, type: "invincible", gameScene: self)
             powerup.run(SKAction.sequence([move, moveDone]))
@@ -392,7 +398,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 powerup.addPowerup(platform: platform, point: point, type: "bonusLives", gameScene: self)
             }
             else if randomPowerupNumber == 2 {
-                let texture = SKTexture(imageNamed: "Spinach")
+                let texture = SKTexture(imageNamed: "Kale")
                 let powerup = Powerup.init(texture: texture, color: UIColor.clear, size: texture.size())
                 powerup.addPowerup(platform: platform, point: point, type: "invincible", gameScene: self)
             }
@@ -438,7 +444,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         platform.addChild(shootEnemy)
         
-        shootEnemy.physicsBody = SKPhysicsBody(rectangleOf: shootEnemy.size, center: CGPoint(x: width/2, y: height/2))
+        shootEnemy.physicsBody = SKPhysicsBody(rectangleOf: shootEnemy.size, center: CGPoint(x: width/2, y: height/2 + 1))
         shootEnemy.physicsBody?.isDynamic = true
         shootEnemy.physicsBody?.categoryBitMask = PhysicsCategory.ShootEnemy
         shootEnemy.physicsBody?.affectedByGravity = false
@@ -470,7 +476,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         platform.addChild(ramEnemy)
         
-        ramEnemy.physicsBody = SKPhysicsBody(rectangleOf: ramEnemy.size, center: CGPoint(x: width/2, y: height/2))
+        ramEnemy.physicsBody = SKPhysicsBody(rectangleOf: ramEnemy.size, center: CGPoint(x: width/2, y: height/2 + 1))
         ramEnemy.physicsBody?.isDynamic = true
         ramEnemy.physicsBody?.categoryBitMask = PhysicsCategory.RamEnemy
         ramEnemy.physicsBody?.affectedByGravity = false
@@ -679,22 +685,24 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func playerDidCollideWithPowerup(powerup: Powerup) {
-        if powerup.getType() == "speedBullet" {
+        if powerup.getType() == "speedBullets" {
+            player.beginPowerupAnimation(type: "lightning")
             self.speedBullets += 1
             self.run(SKAction.sequence([SKAction.wait(forDuration: 10),
                                         SKAction.run({  self.speedBullets -= 1 })]))
         }
         else if powerup.getType() == "invincible" {
             if self.invincible == 0 || self.invincible == 1 {
+                player.beginPowerupAnimation(type: "tear")
                 self.run(SKAction.sequence([SKAction.wait(forDuration: 0.5), SKAction.run(scale1), SKAction.wait(forDuration: 0.5), SKAction.run(scale2), SKAction.wait(forDuration: 0.5), SKAction.run(scale3)]))
             }
             self.invincible += 10
             self.run(SKAction.sequence([SKAction.wait(forDuration: 9), SKAction.run({  self.invincible -= 9 }), SKAction.wait(forDuration: 1), SKAction.run({  self.invincible -= 1 })]))
         } else {
+            player.beginPowerupAnimation(type: "flip")
             enemiesCanStillTakeHitsFrom += 10
             updateEnemiesCanStillTakeHitsFromLabel()
         }
-        player.beginTearingAnimation()
         powerup.removeFromParent()
     }
     
@@ -719,7 +727,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // Check if player & powerup collide
         if (firstBody.categoryBitMask & PhysicsCategory.Player != 0) &&
             (secondBody.categoryBitMask & PhysicsCategory.Powerup != 0) {
-            
             if secondBody.node != nil {
                 playerDidCollideWithPowerup(powerup: secondBody.node! as! Powerup)
             }

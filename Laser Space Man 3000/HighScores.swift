@@ -17,7 +17,22 @@ class HighScores: SKScene {
     //var highScores : Int = []
     
     override func didMove(to view: SKView) {
-        backgroundColor = SKColor.white
+        let sky = SKSpriteNode(imageNamed: "Sky")
+        sky.position = CGPoint(x: size.width/2, y: size.height/2)
+        sky.scale(to: CGSize(width: size.width, height: size.height))
+        sky.zPosition = -1
+        addChild(sky)
+        
+        let texture = SKTexture(imageNamed: "Maraca 1")
+        let badger = SKSpriteNode(texture: texture)
+        badger.position = CGPoint(x: size.width * 0.15, y: size.height*0.30)
+        badger.scale(to: CGSize(width: size.width*0.25, height: size.height*0.35))
+        badger.zPosition = 0
+        addChild(badger)
+        let textureAtlas = SKTextureAtlas(named: "Badger")
+        let frames = ["Maraca 1", "Maraca 2", "Maraca 3", "Maraca 4", "Maraca 5", "Maraca 6", "Maraca 7", "Maraca 8", "Maraca 9", "Maraca 10", "Maraca 11", "Maraca 12", "Maraca 13"].map { textureAtlas.textureNamed($0) }
+        let animate = SKAction.animate(with: frames, timePerFrame: 0.3)
+        badger.run(SKAction.repeatForever(SKAction.sequence([animate, SKAction.run({badger.texture = texture}), SKAction.wait(forDuration: 3)])))
         
         let message = "High Scores"
         let hsLabel = SKLabelNode(fontNamed: "Fipps-Regular")
@@ -65,7 +80,7 @@ class HighScores: SKScene {
         
         let path = CGRect.init(x: Double(size.width/4), y: Double(size.height*5/100), width: Double(size.width/2), height: Double(size.height/4))
         mainMenuButton = SKShapeNode.init(rect: path, cornerRadius: 10)
-        mainMenuButton.strokeColor = UIColor.black
+        mainMenuButton.strokeColor = UIColor.clear
         self.addChild(mainMenuButton)
     }
     
