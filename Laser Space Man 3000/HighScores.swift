@@ -20,12 +20,12 @@ class HighScores: SKScene {
         let sky = SKSpriteNode(imageNamed: "Sky")
         sky.position = CGPoint(x: size.width/2, y: size.height/2)
         sky.scale(to: CGSize(width: size.width, height: size.height))
-        sky.zPosition = -1
+        sky.zPosition = -2
         addChild(sky)
         
         let texture = SKTexture(imageNamed: "Maraca 1")
         let badger = SKSpriteNode(texture: texture)
-        badger.position = CGPoint(x: size.width * 0.15, y: size.height*0.30)
+        badger.position = CGPoint(x: size.width * 0.15, y: size.height*0.50)
         badger.scale(to: CGSize(width: size.width*0.25, height: size.height*0.35))
         badger.zPosition = 0
         addChild(badger)
@@ -44,28 +44,35 @@ class HighScores: SKScene {
         
         let userDefaults = UserDefaults.standard
         let array = userDefaults.array(forKey: "highscores")  as? [Int] ?? [Int]()
-        var height : CGFloat = size.height*75/100
+        var height : CGFloat = size.height*72/100
         for item in array {
             //print("printing label")
             let message2 = String(item)
             let label = SKLabelNode(fontNamed: "Fipps-Regular")
             label.text = message2
-            label.fontSize = 10
-            label.fontColor = SKColor.red
+            label.fontSize = 13
+            label.fontColor = SKColor.yellow
             label.position = CGPoint(x: size.width/2, y: height)
             self.addChild(label)
-            height -= size.height * 0.05
+            height -= size.height * 0.052
         }
      
-        var messageTotal = String("Total Score: ")
-        let totalScore : Int = userDefaults.integer(forKey: "totalscore")
-        messageTotal = messageTotal! + String(totalScore) 
+        let messageTotal = String("Total Score")
         let label = SKLabelNode(fontNamed: "Fipps-Regular")
         label.text = messageTotal
-        label.fontSize = 10
-        label.fontColor = SKColor.red
-        label.position = CGPoint(x: size.width/3, y: size.height*75/100)
+        label.fontSize = 23
+        label.fontColor = SKColor.yellow
+        label.position = CGPoint(x: size.width*0.75, y: size.height*0.50)
         self.addChild(label)
+        
+        let totalScore : Int = userDefaults.integer(forKey: "totalscore")
+        let messageTotalScore = String(totalScore)
+        let label2 = SKLabelNode(fontNamed: "Fipps-Regular")
+        label2.text = messageTotalScore
+        label2.fontSize = 23
+        label2.fontColor = SKColor.yellow
+        label2.position = CGPoint(x: size.width*0.75, y: size.height*0.40)
+        self.addChild(label2)
         
    
         
@@ -73,15 +80,36 @@ class HighScores: SKScene {
         let label3 = SKLabelNode(fontNamed: "Fipps-Regular")
         label3.text = message3
         label3.fontSize = 40
+        label3.zPosition = 0
         label3.fontColor = SKColor.blue
-        label3.position = CGPoint(x: size.width/2, y: size.height*12/100)
+        label3.position = CGPoint(x: size.width/2, y: size.height*5/100)
         self.addChild(label3)
         
         
-        let path = CGRect.init(x: Double(size.width/4), y: Double(size.height*5/100), width: Double(size.width/2), height: Double(size.height/4))
-        mainMenuButton = SKShapeNode.init(rect: path, cornerRadius: 10)
+        let path = CGRect.init(x: size.width*0.20, y: 0, width: size.width*0.60, height: size.height*0.25)
+        mainMenuButton = SKShapeNode.init(rect: path)
         mainMenuButton.strokeColor = UIColor.clear
+        mainMenuButton.zPosition = 1
         self.addChild(mainMenuButton)
+        
+        run(SKAction.repeatForever(SKAction.sequence([SKAction.run(addStar), SKAction.wait(forDuration: 1)  ])))
+    }
+    
+    func addStar() {
+        let starY : CGFloat = CGFloat(Float(arc4random()) / Float(UINT32_MAX)) * size.height
+        let starX : CGFloat = CGFloat(Float(arc4random()) / Float(UINT32_MAX)) * size.width
+        let rectangle = CGRect.init(x: 0, y: 0, width: size.width*0.05, height: size.height*0.02)
+        let star = SKShapeNode.init(rect: rectangle)
+        star.position = CGPoint(x: starX, y: starY)
+        star.strokeColor = SKColor.black
+        star.fillColor = SKColor.yellow
+        star.zPosition = -1
+        addChild(star)
+        let move = SKAction.moveTo(x: starX + size.width*0.33, duration: TimeInterval(2))
+        let moveDone = SKAction.removeFromParent()
+        
+        star.run(SKAction.sequence([move, moveDone]))
+        
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {

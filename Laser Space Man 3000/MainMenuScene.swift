@@ -29,7 +29,7 @@ class MainMenuScene: SKScene {
         
         let texture = SKTexture(imageNamed: "Macarena 1")
         let badger = SKSpriteNode(texture: texture)
-        badger.position = CGPoint(x: size.width * 0.15, y: size.height*0.30)
+        badger.position = CGPoint(x: size.width * 0.15, y: size.height*0.35)
         badger.scale(to: CGSize(width: size.width*0.25, height: size.height*0.35))
         badger.zPosition = 0
         addChild(badger)
@@ -62,15 +62,15 @@ class MainMenuScene: SKScene {
         addChild(label2)
         
         // Try as a shape
-        let path = CGRect.init(x: Double(size.width/4), y: Double(size.height*1/4), width: Double(size.width/2), height: Double(size.height/4))
-        playButtonDoneAsAShape = SKShapeNode.init(rect: path, cornerRadius: 10)
-        playButtonDoneAsAShape.strokeColor = UIColor.clear
+        let path = CGRect.init(x: size.width*0.25, y: size.height*0.27, width: size.width/2, height: size.height*0.40)
+        playButtonDoneAsAShape = SKShapeNode.init(rect: path)
+        playButtonDoneAsAShape.strokeColor = UIColor.black
         playButtonDoneAsAShape.zPosition = 2
         addChild(playButtonDoneAsAShape)
         
         let path2 = CGRect.init(x: Double(size.width/4), y: Double(1), width: Double(size.width/2), height: Double(size.height/4))
-        hsButton = SKShapeNode.init(rect: path2, cornerRadius: 10)
-        hsButton.strokeColor = UIColor.clear
+        hsButton = SKShapeNode.init(rect: path2)
+        hsButton.strokeColor = UIColor.black
         hsButton.zPosition = 2
         addChild(hsButton)
         
@@ -84,7 +84,9 @@ class MainMenuScene: SKScene {
         
         
         adjustLabelFontSizeToFitRect(labelNode: label, rect: path)
+        label.position.y += size.height*0.08
         adjustLabelFontSizeToFitRect(labelNode: label2, rect: path2)
+        label2.position.y += size.height*0.02
         adjustLabelFontSizeToFitRect(labelNode: title, rect: CGRect.init(x: Double(size.width/10), y: Double(size.height*2/3), width: Double(size.width*8/10), height: Double(size.height/4)))
         
         run(SKAction.repeatForever(SKAction.sequence([SKAction.run(addStar), SKAction.wait(forDuration: 1)  ])))

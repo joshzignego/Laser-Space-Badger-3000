@@ -28,7 +28,7 @@ class GameOverScene: SKScene {
         let sky = SKSpriteNode(imageNamed: "Sky")
         sky.position = CGPoint(x: size.width/2, y: size.height/2)
         sky.scale(to: CGSize(width: size.width, height: size.height))
-        sky.zPosition = -1
+        sky.zPosition = -2
         addChild(sky)
         
         let texture = SKTexture(imageNamed: "Coffin-1")
@@ -140,16 +140,35 @@ class GameOverScene: SKScene {
 
         
         let path = CGRect.init(x: Double(size.width*0.22), y: Double(size.height*33/100), width: Double(size.width*0.56), height: Double(size.height/4))
-        playAgainButton = SKShapeNode.init(rect: path, cornerRadius: 10)
+        playAgainButton = SKShapeNode.init(rect: path)
         playAgainButton.zPosition = 5
-        playAgainButton.strokeColor = UIColor.clear
+        playAgainButton.strokeColor = UIColor.black
         self.addChild(playAgainButton)
 
         let path2 = CGRect.init(x: Double(size.width*0.22), y: Double(size.height*5/100), width: Double(size.width*0.56), height: Double(size.height/4))
-        mainMenuButton = SKShapeNode.init(rect: path2, cornerRadius: 10)
+        mainMenuButton = SKShapeNode.init(rect: path2)
         mainMenuButton.zPosition = 5
-        mainMenuButton.strokeColor = UIColor.clear
+        mainMenuButton.strokeColor = UIColor.black
         self.addChild(mainMenuButton)
+        
+        run(SKAction.repeatForever(SKAction.sequence([SKAction.run(addStar), SKAction.wait(forDuration: 1)  ])))
+    }
+    
+    func addStar() {
+        let starY : CGFloat = CGFloat(Float(arc4random()) / Float(UINT32_MAX)) * size.height
+        let starX : CGFloat = CGFloat(Float(arc4random()) / Float(UINT32_MAX)) * size.width
+        let rectangle = CGRect.init(x: 0, y: 0, width: size.width*0.05, height: size.height*0.02)
+        let star = SKShapeNode.init(rect: rectangle)
+        star.position = CGPoint(x: starX, y: starY)
+        star.strokeColor = SKColor.black
+        star.fillColor = SKColor.yellow
+        star.zPosition = -1
+        addChild(star)
+        let move = SKAction.moveTo(x: starX + size.width*0.33, duration: TimeInterval(2))
+        let moveDone = SKAction.removeFromParent()
+        
+        star.run(SKAction.sequence([move, moveDone]))
+        
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
