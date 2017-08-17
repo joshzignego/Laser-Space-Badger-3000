@@ -33,8 +33,8 @@ class GameOverScene: SKScene {
         
         let texture = SKTexture(imageNamed: "Coffin-1")
         let badger = SKSpriteNode(texture: texture)
-        badger.position = CGPoint(x: size.width * 0.15, y: size.height*0.30)
-        badger.scale(to: CGSize(width: size.width*0.28, height: size.height*0.22))
+        badger.position = CGPoint(x: size.width * 0.125, y: size.height*0.35)
+        badger.scale(to: CGSize(width: size.width*0.25, height: size.height*0.22))
         badger.zPosition = 0
         addChild(badger)
         let textureAtlas = SKTextureAtlas(named: "Badger")
@@ -44,7 +44,7 @@ class GameOverScene: SKScene {
         
         let texture2 = SKTexture(imageNamed: "Spider RESIZE-1")
         let spider = SKSpriteNode(texture: texture2)
-        spider.position = CGPoint(x: size.width+size.width*0.075, y: size.height*0.30)
+        spider.position = CGPoint(x: size.width+size.width*0.075, y: size.height*0.35)
         spider.scale(to: CGSize(width: size.width*0.15, height: size.height*0.22))
         spider.zPosition = 0
         addChild(spider)
@@ -126,7 +126,7 @@ class GameOverScene: SKScene {
         label2.text = message2
         label2.fontSize = 40
         label2.fontColor = SKColor.blue
-        label2.position = CGPoint(x: size.width/2, y: size.height*40/100)
+        label2.position = CGPoint(x: size.width/2, y: size.height*38/100)
         self.addChild(label2)
         
         let message3 = "Main Menu"
@@ -135,20 +135,20 @@ class GameOverScene: SKScene {
         label3.zPosition = 2
         label3.fontSize = 40
         label3.fontColor = SKColor.blue
-        label3.position = CGPoint(x: size.width/2, y: size.height*12/100)
+        label3.position = CGPoint(x: size.width/2, y: size.height*10/100)
         self.addChild(label3)
 
         
-        let path = CGRect.init(x: Double(size.width*0.22), y: Double(size.height*33/100), width: Double(size.width*0.56), height: Double(size.height/4))
+        let path = CGRect.init(x: size.width*0.22, y: size.height*31/100, width: size.width*0.56, height: size.height/4)
         playAgainButton = SKShapeNode.init(rect: path)
         playAgainButton.zPosition = 5
-        playAgainButton.strokeColor = UIColor.black
+        playAgainButton.strokeColor = UIColor.clear
         self.addChild(playAgainButton)
 
-        let path2 = CGRect.init(x: Double(size.width*0.22), y: Double(size.height*5/100), width: Double(size.width*0.56), height: Double(size.height/4))
+        let path2 = CGRect.init(x: size.width*0.22, y: size.height*3/100, width: size.width*0.56, height: size.height/4)
         mainMenuButton = SKShapeNode.init(rect: path2)
         mainMenuButton.zPosition = 5
-        mainMenuButton.strokeColor = UIColor.black
+        mainMenuButton.strokeColor = UIColor.clear
         self.addChild(mainMenuButton)
         
         run(SKAction.repeatForever(SKAction.sequence([SKAction.run(addStar), SKAction.wait(forDuration: 1)  ])))

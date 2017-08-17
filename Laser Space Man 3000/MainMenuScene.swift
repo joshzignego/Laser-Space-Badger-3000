@@ -29,7 +29,7 @@ class MainMenuScene: SKScene {
         
         let texture = SKTexture(imageNamed: "Macarena 1")
         let badger = SKSpriteNode(texture: texture)
-        badger.position = CGPoint(x: size.width * 0.15, y: size.height*0.35)
+        badger.position = CGPoint(x: size.width * 0.18, y: size.height*0.40)
         badger.scale(to: CGSize(width: size.width*0.25, height: size.height*0.35))
         badger.zPosition = 0
         addChild(badger)
@@ -38,9 +38,14 @@ class MainMenuScene: SKScene {
         let animate = SKAction.animate(with: frames, timePerFrame: 0.4)
         badger.run(SKAction.repeatForever(SKAction.sequence([animate, SKAction.run({badger.texture = texture}), SKAction.wait(forDuration: 4)])))
         
-        
-        
-        
+        /*
+        for name in UIFont.familyNames {
+            print(name)
+            if let nameString = name as? String {
+                print(UIFont.fontNames(forFamilyName: nameString))
+            }
+        }
+        */
         
         
         
@@ -62,32 +67,47 @@ class MainMenuScene: SKScene {
         addChild(label2)
         
         // Try as a shape
-        let path = CGRect.init(x: size.width*0.25, y: size.height*0.27, width: size.width/2, height: size.height*0.40)
+        let path = CGRect.init(x: size.width*0.25, y: size.height*0.27, width: size.width*0.60, height: size.height*0.48)
         playButtonDoneAsAShape = SKShapeNode.init(rect: path)
-        playButtonDoneAsAShape.strokeColor = UIColor.black
+        playButtonDoneAsAShape.position.x += size.width * 0.10
+        playButtonDoneAsAShape.strokeColor = UIColor.clear
         playButtonDoneAsAShape.zPosition = 2
         addChild(playButtonDoneAsAShape)
         
-        let path2 = CGRect.init(x: Double(size.width/4), y: Double(1), width: Double(size.width/2), height: Double(size.height/4))
+        let path2 = CGRect.init(x: size.width/4, y: 1, width: size.width*0.60, height: size.height/4)
         hsButton = SKShapeNode.init(rect: path2)
-        hsButton.strokeColor = UIColor.black
+        hsButton.strokeColor = UIColor.clear
+        hsButton.position.x += size.width * 0.10
         hsButton.zPosition = 2
         addChild(hsButton)
         
-        let titleMessage = "Laser Space Badger 3000"
-        let title = SKLabelNode(fontNamed: "Avenir-Black")
+        let titleMessage = "Laser Space Badger"
+        let title = SKLabelNode(fontNamed: "Fipps-Regular")
         title.text = titleMessage
         title.fontSize = 80
         title.zPosition = 1
         title.fontColor = SKColor.blue
         addChild(title)
         
+        let title3000Message = "3000"
+        let title3000 = SKLabelNode(fontNamed: "Alisandra-Demo")
+        title3000.text = title3000Message
+        title3000.fontSize = 200
+        title3000.zPosition = 1
+        //title3000.zRotation -= 3.14159 / 12
+        title3000.fontColor = SKColor.red
+        addChild(title3000)
+        
         
         adjustLabelFontSizeToFitRect(labelNode: label, rect: path)
         label.position.y += size.height*0.08
+        label.position.x += size.width * 0.10
         adjustLabelFontSizeToFitRect(labelNode: label2, rect: path2)
         label2.position.y += size.height*0.02
-        adjustLabelFontSizeToFitRect(labelNode: title, rect: CGRect.init(x: Double(size.width/10), y: Double(size.height*2/3), width: Double(size.width*8/10), height: Double(size.height/4)))
+        label2.position.x += size.width * 0.12
+        adjustLabelFontSizeToFitRect(labelNode: title, rect: CGRect.init(x: size.width*0.03, y: size.height*2/3, width: size.width*0.68, height: size.height*0.35))
+        adjustLabelFontSizeToFitRect(labelNode: title3000, rect: CGRect.init(x: size.width*0.70, y: size.height*0.70, width: size.width*0.28, height: size.height*0.30))
+        
         
         run(SKAction.repeatForever(SKAction.sequence([SKAction.run(addStar), SKAction.wait(forDuration: 1)  ])))
     }

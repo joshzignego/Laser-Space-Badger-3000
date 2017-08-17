@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		207A64B91F40F290001D5739 /* ButtonManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 207A64B81F40F290001D5739 /* ButtonManager.swift */; };
 		20863F511F3D4BDC006CFAF3 /* Powerup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20863F501F3D4BDC006CFAF3 /* Powerup.swift */; };
+		20A7A3B61F44C97E00B999A1 /* Alisandra Demo.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 20A7A3B51F44C93F00B999A1 /* Alisandra Demo.ttf */; };
 		20CF4FD81F2FE83700C6D5DA /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20CF4FD71F2FE83700C6D5DA /* AppDelegate.swift */; };
 		20CF4FDE1F2FE83700C6D5DA /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20CF4FDD1F2FE83700C6D5DA /* GameScene.swift */; };
 		20CF4FE01F2FE83700C6D5DA /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20CF4FDF1F2FE83700C6D5DA /* GameViewController.swift */; };
@@ -45,6 +46,7 @@
 /* Begin PBXFileReference section */
 		207A64B81F40F290001D5739 /* ButtonManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ButtonManager.swift; sourceTree = "<group>"; };
 		20863F501F3D4BDC006CFAF3 /* Powerup.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Powerup.swift; sourceTree = "<group>"; };
+		20A7A3B51F44C93F00B999A1 /* Alisandra Demo.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Alisandra Demo.ttf"; sourceTree = "<group>"; };
 		20CF4FD41F2FE83700C6D5DA /* Laser Space Man 3000.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Laser Space Man 3000.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		20CF4FD71F2FE83700C6D5DA /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		20CF4FDD1F2FE83700C6D5DA /* GameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScene.swift; sourceTree = "<group>"; };
@@ -155,6 +157,7 @@
 		20E125901F31AAD700D17028 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				20A7A3B51F44C93F00B999A1 /* Alisandra Demo.ttf */,
 				20E125911F31AAE700D17028 /* Fipps-Regular.otf */,
 			);
 			name = Resources;
@@ -268,6 +271,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				20A7A3B61F44C97E00B999A1 /* Alisandra Demo.ttf in Resources */,
 				20E125941F31ABCF00D17028 /* Fipps-Regular.otf in Resources */,
 				20CF4FE31F2FE83700C6D5DA /* Main.storyboard in Resources */,
 				20CF4FE51F2FE83700C6D5DA /* Assets.xcassets in Resources */,

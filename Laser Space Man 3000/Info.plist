@@ -24,6 +24,7 @@
 	<true/>
 	<key>UIAppFonts</key>
 	<array>
+		<string>Alisandra Demo.ttf</string>
 		<string>Fipps-Regular.otf</string>
 	</array>
 	<key>UILaunchStoryboardName</key>

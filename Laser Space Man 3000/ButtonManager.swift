@@ -80,7 +80,7 @@ class ButtonManager {
         areYouSure_Yes.strokeColor = UIColor.black
         areYouSure_Yes.fillColor = UIColor.white
         areYouSure_Yes.zPosition = 100
-        areYouSure_Yes.createLabel(message: "Yes", fontSize: 10, color: SKColor.black, position: CGPoint(x: gameScene.size.width*0.42, y: gameScene.size.height * 0.45), zPosition: 150)
+        areYouSure_Yes.createLabel(message: "Yes", fontSize: 10, color: SKColor.black, position: CGPoint(x: gameScene.size.width*0.41, y: gameScene.size.height * 0.455), zPosition: 150)
         gameScene.addChild(areYouSure_Yes)
         
         return areYouSure_Yes
@@ -92,7 +92,7 @@ class ButtonManager {
         areYouSure_No.strokeColor = UIColor.black
         areYouSure_No.fillColor = UIColor.white
         areYouSure_No.zPosition = 100
-        areYouSure_No.createLabel(message: "No", fontSize: 10, color: SKColor.black, position: CGPoint(x: gameScene.size.width*0.57, y: gameScene.size.height * 0.45), zPosition: 150)
+        areYouSure_No.createLabel(message: "No", fontSize: 10, color: SKColor.black, position: CGPoint(x: gameScene.size.width*0.57, y: gameScene.size.height * 0.455), zPosition: 150)
         gameScene.addChild(areYouSure_No)
         
         return areYouSure_No
