@@ -25,12 +25,14 @@ class GameOverScene: SKScene {
     }
     
     override func didMove(to view: SKView) {
+        //Add background
         let sky = SKSpriteNode(imageNamed: "Sky")
         sky.position = CGPoint(x: size.width/2, y: size.height/2)
         sky.scale(to: CGSize(width: size.width, height: size.height))
         sky.zPosition = -2
         addChild(sky)
         
+        //Add coffin Badger
         let texture = SKTexture(imageNamed: "Coffin-1")
         let badger = SKSpriteNode(texture: texture)
         badger.position = CGPoint(x: size.width * 0.125, y: size.height*0.35)
@@ -42,17 +44,16 @@ class GameOverScene: SKScene {
         let animate = SKAction.animate(with: frames, timePerFrame: 0.4)
         badger.run(SKAction.repeatForever(SKAction.sequence([animate, SKAction.run({badger.texture = texture}), SKAction.wait(forDuration: 4)])))
         
+        //Spider motion
         let texture2 = SKTexture(imageNamed: "Spider RESIZE-1")
         let spider = SKSpriteNode(texture: texture2)
         spider.position = CGPoint(x: size.width+size.width*0.075, y: size.height*0.35)
         spider.scale(to: CGSize(width: size.width*0.15, height: size.height*0.22))
         spider.zPosition = 0
         addChild(spider)
-        
         let moveOut = SKAction.moveTo(x: size.width*0.85, duration: TimeInterval(2))
         let moveBack = SKAction.moveTo(x: size.width+size.width*0.075, duration: TimeInterval(2))
         spider.run(SKAction.repeatForever(SKAction.sequence([moveOut, SKAction.wait(forDuration: 3.6), moveBack, SKAction.wait(forDuration: 4)])))
-
 
         let defaults = UserDefaults.standard
         var array = defaults.object(forKey: "highscores") as? [Int] ?? [Int]()
@@ -61,7 +62,7 @@ class GameOverScene: SKScene {
         let arraySize = array.count
         var index : Int = 0
         
-        
+        //Update total score
         var totalScore = defaults.integer(forKey: "totalscore")
         totalScore += score
         defaults.set(totalScore, forKey: "totalscore")
@@ -70,7 +71,7 @@ class GameOverScene: SKScene {
         if arraySize == 0 {
             array.insert(score, at: 0)
         }
-            
+        //Add to highscores if applicable
         else {
             while flag {
                 if index >= arraySize {
@@ -100,44 +101,12 @@ class GameOverScene: SKScene {
         }
         defaults.set(array, forKey: "highscores")
         
-        
-        
-        
-        
         var scoreMessage = "Score: "
         scoreMessage.append(String(score))
-        let scoreLabel = SKLabelNode(fontNamed: "Fipps-Regular")
-        scoreLabel.text = scoreMessage
-        scoreLabel.fontSize = 40
-        scoreLabel.fontColor = SKColor.yellow
-        scoreLabel.position = CGPoint(x: size.width/2, y: size.height*60/100)
-        self.addChild(scoreLabel)
-        
-        let message = "Game Over"
-        let label = SKLabelNode(fontNamed: "Fipps-Regular")
-        label.text = message
-        label.fontSize = 60
-        label.fontColor = SKColor.red
-        label.position = CGPoint(x: size.width/2, y: size.height*75/100)
-        self.addChild(label)
-        
-        let message2 = "Play Again"
-        let label2 = SKLabelNode(fontNamed: "Fipps-Regular")
-        label2.text = message2
-        label2.fontSize = 40
-        label2.fontColor = SKColor.blue
-        label2.position = CGPoint(x: size.width/2, y: size.height*38/100)
-        self.addChild(label2)
-        
-        let message3 = "Main Menu"
-        let label3 = SKLabelNode(fontNamed: "Fipps-Regular")
-        label3.text = message3
-        label3.zPosition = 2
-        label3.fontSize = 40
-        label3.fontColor = SKColor.blue
-        label3.position = CGPoint(x: size.width/2, y: size.height*10/100)
-        self.addChild(label3)
-
+        createMessage(point: CGPoint(x: size.width*0.50, y: size.height*60/100), message: scoreMessage, size: 40, color: SKColor.yellow)
+        createMessage(point: CGPoint(x: size.width*0.50, y: size.height*75/100), message: "Game Over", size: 60, color: SKColor.red)
+        createMessage(point: CGPoint(x: size.width*0.50, y: size.height*10/100), message: "Main Menu", size: 40, color: SKColor.blue)
+        createMessage(point: CGPoint(x: size.width*0.50, y: size.height*38/100), message: "Play Again", size: 40, color: SKColor.blue)
         
         let path = CGRect.init(x: size.width*0.22, y: size.height*31/100, width: size.width*0.56, height: size.height/4)
         playAgainButton = SKShapeNode.init(rect: path)
@@ -153,7 +122,17 @@ class GameOverScene: SKScene {
         
         run(SKAction.repeatForever(SKAction.sequence([SKAction.run(addStar), SKAction.wait(forDuration: 1)  ])))
     }
-    
+
+    func createMessage(point: CGPoint, message: String, size: CGFloat, color: SKColor) {
+        let label = SKLabelNode(fontNamed: "Fipps-Regular")
+        label.text = message
+        label.fontSize = size
+        label.fontColor = color
+        label.position = point
+        label.zPosition = 0
+        self.addChild(label)
+    }
+
     func addStar() {
         let starY : CGFloat = CGFloat(Float(arc4random()) / Float(UINT32_MAX)) * size.height
         let starX : CGFloat = CGFloat(Float(arc4random()) / Float(UINT32_MAX)) * size.width
@@ -177,22 +156,19 @@ class GameOverScene: SKScene {
             let node = self.atPoint(pos)
             
             if node == playAgainButton {
-                if let view = view {
+                if view != nil {
                     let transition:SKTransition = SKTransition.fade(withDuration: 1)
                     let scene:SKScene = GameScene(size: self.size)
                     self.view?.presentScene(scene, transition: transition)
                 }
             }
             else if node == mainMenuButton {
-                if let view = view {
+                if view != nil {
                     let transition:SKTransition = SKTransition.fade(withDuration: 1)
                     let scene:SKScene = MainMenuScene(size: self.size)
                     self.view?.presentScene(scene, transition: transition)
                 }
             }
-            
-            
         }
     }
-    
 }

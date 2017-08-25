@@ -27,19 +27,15 @@ class MyPlayerNode: SKSpriteNode {
     }
     
     func initializePlayer(gameScene: GameScene) {
-        self.position = CGPoint(x: gameScene.size.width * 0.1, y: gameScene.size.height * 1 / 7 + CGFloat(gameScene.yScaler)*gameScene.size.height/2)
-        self.zPosition = 0
-        let width: Double = Double(gameScene.size.width) * gameScene.xScaler
-        let height: Double = Double(gameScene.size.height) * gameScene.yScaler
-        self.scale(to: CGSize(width: width, height: height))
+        self.position = CGPoint(x: gameScene.size.width * 0.1, y: gameScene.size.height * 1 / 7 + gameScene.yScaler/2)
+        self.zPosition = 10
+        self.scale(to: CGSize(width: gameScene.xScaler, height: gameScene.yScaler))
         gameScene.addChild(self)
         
         self.physicsBody = SKPhysicsBody(rectangleOf: self.size)
         self.physicsBody?.isDynamic = true
-        //self.physicsBody?.linearDamping = 1
         self.physicsBody?.allowsRotation = false
         self.physicsBody?.restitution = 0
-        //self.physicsBody?.friction = 1
         self.physicsBody?.usesPreciseCollisionDetection = true
         self.physicsBody?.categoryBitMask = PhysicsCategory.Player
         self.physicsBody?.contactTestBitMask = PhysicsCategory.ShootEnemy | PhysicsCategory.RamEnemy

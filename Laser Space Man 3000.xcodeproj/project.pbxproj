@@ -467,6 +467,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEVELOPMENT_TEAM = T2P3JRX5A4;
 				INFOPLIST_FILE = "Laser Space Man 3000/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "Josh-Zignego.Laser-Space-Man-3000";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -483,6 +484,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEVELOPMENT_TEAM = T2P3JRX5A4;
 				INFOPLIST_FILE = "Laser Space Man 3000/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "Josh-Zignego.Laser-Space-Man-3000";
 				PRODUCT_NAME = "$(TARGET_NAME)";

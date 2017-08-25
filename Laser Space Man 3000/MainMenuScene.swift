@@ -17,18 +17,16 @@ class MainMenuScene: SKScene {
     
     override func didMove(to view: SKView) {
         
-        //playButton = SKSpriteNode(texture: playButtonText)
-        //backgroundColor = SKColor.purple
-        
-        
+        //Add background
         let sky = SKSpriteNode(imageNamed: "Sky")
         sky.position = CGPoint(x: size.width/2, y: size.height/2)
         sky.scale(to: CGSize(width: size.width, height: size.height))
         sky.zPosition = -2
         addChild(sky)
         
+        //Add dancing Badger
         let texture = SKTexture(imageNamed: "Macarena 1")
-        let badger = SKSpriteNode(texture: texture)
+        let badger = SKSpriteNode(imageNamed: "Macarena 1")
         badger.position = CGPoint(x: size.width * 0.18, y: size.height*0.40)
         badger.scale(to: CGSize(width: size.width*0.25, height: size.height*0.35))
         badger.zPosition = 0
@@ -38,35 +36,7 @@ class MainMenuScene: SKScene {
         let animate = SKAction.animate(with: frames, timePerFrame: 0.4)
         badger.run(SKAction.repeatForever(SKAction.sequence([animate, SKAction.run({badger.texture = texture}), SKAction.wait(forDuration: 4)])))
         
-        /*
-        for name in UIFont.familyNames {
-            print(name)
-            if let nameString = name as? String {
-                print(UIFont.fontNames(forFamilyName: nameString))
-            }
-        }
-        */
-        
-        
-        
-        
-        let message = "Play"
-        let label = SKLabelNode(fontNamed: "Fipps-Regular")
-        label.text = message
-        label.fontSize = 40
-        label.zPosition = 1
-        label.fontColor = SKColor.blue
-        addChild(label)
-        
-        let message2 = "High Scores"
-        let label2 = SKLabelNode(fontNamed: "Fipps-Regular")
-        label2.text = message2
-        label2.fontSize = 40
-        label2.zPosition = 1
-        label2.fontColor = SKColor.blue
-        addChild(label2)
-        
-        // Try as a shape
+        //Add buttons
         let path = CGRect.init(x: size.width*0.25, y: size.height*0.27, width: size.width*0.60, height: size.height*0.48)
         playButtonDoneAsAShape = SKShapeNode.init(rect: path)
         playButtonDoneAsAShape.position.x += size.width * 0.10
@@ -81,24 +51,14 @@ class MainMenuScene: SKScene {
         hsButton.zPosition = 2
         addChild(hsButton)
         
-        let titleMessage = "Laser Space Badger"
-        let title = SKLabelNode(fontNamed: "Fipps-Regular")
-        title.text = titleMessage
-        title.fontSize = 80
-        title.zPosition = 1
-        title.fontColor = SKColor.blue
-        addChild(title)
-        
-        let title3000Message = "3000"
-        let title3000 = SKLabelNode(fontNamed: "Alisandra-Demo")
-        title3000.text = title3000Message
-        title3000.fontSize = 200
-        title3000.zPosition = 1
-        //title3000.zRotation -= 3.14159 / 12
-        title3000.fontColor = SKColor.red
-        addChild(title3000)
-        
-        
+        let label = createMessage(point: CGPoint(x: size.width/2, y: size.height*5/100), message: "Play", size: 40, color: SKColor.blue)
+        let label2 = createMessage(point: CGPoint(x: size.width/2, y: size.height*5/100), message: "High Scores", size: 40, color: SKColor.blue)
+        let title = createMessage(point: CGPoint(x: size.width/2, y: size.height*5/100), message: "Laser Space Badger", size: 80, color: SKColor.blue)
+        let title3000 = createMessage(point: CGPoint(x: size.width/2, y: size.height*5/100), message: "3000", size: 200, color: SKColor.red)
+        title3000.fontName = "Alisandra-Demo"
+
+
+        //Adjust labels
         adjustLabelFontSizeToFitRect(labelNode: label, rect: path)
         label.position.y += size.height*0.08
         label.position.x += size.width * 0.10
@@ -110,6 +70,18 @@ class MainMenuScene: SKScene {
         
         
         run(SKAction.repeatForever(SKAction.sequence([SKAction.run(addStar), SKAction.wait(forDuration: 1)  ])))
+    }
+    
+    func createMessage(point: CGPoint, message: String, size: CGFloat, color: SKColor)->SKLabelNode {
+        let label = SKLabelNode(fontNamed: "Fipps-Regular")
+        label.text = message
+        label.fontSize = size
+        label.fontColor = color
+        label.position = point
+        label.zPosition = 1
+        self.addChild(label)
+        
+        return label
     }
     
     func addStar() {

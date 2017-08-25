@@ -17,33 +17,24 @@ class Powerup: SKSpriteNode {
     func addPowerup(platform: SKShapeNode, point: CGPoint, type: String, gameScene: GameScene) {
         self.setType(type: type)
         self.position = point
-        self.anchorPoint = CGPoint(x: 0, y: 0)
-        let width: Double = Double(gameScene.size.width) * gameScene.xScaler
-        let height: Double = Double(gameScene.size.height) * gameScene.yScaler
-        self.scale(to: CGSize(width: width, height: height))
-        platform.addChild(self)
+        addPowerupInfo(gameScene: gameScene)
         
-        self.physicsBody = SKPhysicsBody(rectangleOf: self.size, center: CGPoint(x: width/2, y: height/2))
-        self.physicsBody?.isDynamic = true
-        self.physicsBody?.categoryBitMask = PhysicsCategory.Powerup
-        self.physicsBody?.affectedByGravity = false
-        self.physicsBody?.linearDamping = 0
-        self.physicsBody?.allowsRotation = false
-        self.physicsBody?.friction = 0
-        self.physicsBody?.contactTestBitMask = PhysicsCategory.Player
-        self.physicsBody?.collisionBitMask = PhysicsCategory.None
+        platform.addChild(self)
     }
     
     func addGroundPowerup(point: CGPoint, type: String, gameScene: GameScene) {
         self.setType(type: type)
         self.position = point
-        self.anchorPoint = CGPoint(x: 0, y: 0)
-        let width: Double = Double(gameScene.size.width) * gameScene.xScaler
-        let height: Double = Double(gameScene.size.height) * gameScene.yScaler
-        self.scale(to: CGSize(width: width, height: height))
-        gameScene.addChild(self)
+        addPowerupInfo(gameScene: gameScene)
         
-        self.physicsBody = SKPhysicsBody(rectangleOf: self.size, center: CGPoint(x: width/2, y: height/2))
+        gameScene.addChild(self)
+    }
+    
+    func addPowerupInfo(gameScene: GameScene) {
+        self.anchorPoint = CGPoint(x: 0, y: 0)
+        self.scale(to: CGSize(width: gameScene.xScaler, height: gameScene.yScaler))
+        
+        self.physicsBody = SKPhysicsBody(rectangleOf: self.size, center: CGPoint(x: gameScene.xScaler/2, y: gameScene.yScaler/2))
         self.physicsBody?.isDynamic = true
         self.physicsBody?.categoryBitMask = PhysicsCategory.Powerup
         self.physicsBody?.affectedByGravity = false

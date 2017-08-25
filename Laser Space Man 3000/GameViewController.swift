@@ -15,13 +15,9 @@ class GameViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         let scene = MainMenuScene(size: self.view.bounds.size)
-        let view = self.view as! SKView
-        //view.showsFPS = true
-        //view.showsPhysics = true
-        //view.showsNodeCount = true
-        view.ignoresSiblingOrder = true
+        let skView = view as! SKView
         scene.scaleMode = .resizeFill
-        view.presentScene(scene)
+        skView.presentScene(scene)
     }
 
     override var shouldAutorotate: Bool {
@@ -38,7 +34,6 @@ class GameViewController: UIViewController {
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
-        // Release any cached data, images, etc that aren't in use.
     }
 
     override var prefersStatusBarHidden: Bool {

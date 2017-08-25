@@ -18,6 +18,8 @@ class ButtonManager {
         pauseButton.fillColor = UIColor.white
         pauseButton.zPosition = 100
         pauseButton.createLabel(message: "Pause", fontSize: 10, color: SKColor.blue, position: CGPoint(x: gameScene.size.width*8/100, y: gameScene.size.height*5/100), zPosition: 150)
+        adjustLabelFontSizeToFitRect(labelNode: pauseButton.label, rect: path)
+        pauseButton.label.position.y += gameScene.size.height*5/1000
         gameScene.addChild(pauseButton)
         
         return pauseButton
@@ -28,8 +30,8 @@ class ButtonManager {
         enemiesCanStillTakeHitsFromLabel.text = String(gameScene.enemiesPassedToDie)
         enemiesCanStillTakeHitsFromLabel.fontSize = 25
         enemiesCanStillTakeHitsFromLabel.fontColor = SKColor.red
-        enemiesCanStillTakeHitsFromLabel.position = CGPoint(x: gameScene.size.width*15/100, y: gameScene.size.height*88/100)
-        enemiesCanStillTakeHitsFromLabel.zPosition += 100
+        enemiesCanStillTakeHitsFromLabel.position = CGPoint(x: gameScene.size.width*16/100, y: gameScene.size.height*88/100)
+        enemiesCanStillTakeHitsFromLabel.zPosition = 100
         gameScene.addChild(enemiesCanStillTakeHitsFromLabel)
         
         return enemiesCanStillTakeHitsFromLabel
@@ -39,9 +41,9 @@ class ButtonManager {
         let icon = SKSpriteNode(imageNamed: "Spider RESIZE-1")
         icon.anchorPoint = CGPoint(x: 0, y: 0)
         icon.position = CGPoint(x: gameScene.size.width * 0.05, y: gameScene.size.height * 0.88)
-        icon.zPosition += 50
-        let width: Double = Double(gameScene.size.width) * gameScene.xScaler
-        let height: Double = Double(gameScene.size.height) * gameScene.yScaler
+        icon.zPosition = 50
+        let width: CGFloat = gameScene.xScaler
+        let height: CGFloat = gameScene.yScaler
         icon.scale(to: CGSize(width: width, height: height))
         gameScene.addChild(icon)
         
@@ -55,6 +57,8 @@ class ButtonManager {
         mainMenuButton.fillColor = UIColor.white
         mainMenuButton.zPosition = 100
         mainMenuButton.createLabel(message: "Menu", fontSize: 10, color: SKColor.blue, position: CGPoint(x: gameScene.size.width*90/100, y: gameScene.size.height*5/100), zPosition: 150)
+        adjustLabelFontSizeToFitRect(labelNode: mainMenuButton.label, rect: path)
+        mainMenuButton.label.position.y += gameScene.size.height*5/1000
         gameScene.addChild(mainMenuButton)
         
         return mainMenuButton
@@ -116,7 +120,7 @@ class ButtonManager {
     func makeEnemyCounterWall(gameScene: GameScene)->SKShapeNode {
         let rectangle = CGRect.init(x: 0, y: 0, width: 2, height: Double(gameScene.size.height))
         let enemyCounterWall = SKShapeNode.init(rect: rectangle)
-        enemyCounterWall.position = CGPoint(x: -gameScene.xScaler*Double(gameScene.size.width)-1, y: Double(gameScene.size.height)/2)
+        enemyCounterWall.position = CGPoint(x: -gameScene.xScaler-1, y: gameScene.size.height/2)
         enemyCounterWall.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: 2, height: gameScene.size.height))
         enemyCounterWall.physicsBody?.isDynamic = false
         enemyCounterWall.physicsBody?.categoryBitMask = PhysicsCategory.EnemyCounterWall
@@ -151,5 +155,16 @@ class ButtonManager {
         gameScene.addChild(scoreLabel)
         
         return scoreLabel
+    }
+    
+    func adjustLabelFontSizeToFitRect(labelNode: SKLabelNode, rect:CGRect) {
+        // Determine the font scaling factor that should let the label text fit in the given rectangle.
+        let scalingFactor = min(rect.width / labelNode.frame.width, rect.height / labelNode.frame.height)
+        
+        // Change the fontSize.
+        labelNode.fontSize *= scalingFactor
+        
+        // Optionally move the SKLabelNode to the center of the rectangle.
+        labelNode.position = CGPoint(x: rect.midX, y: rect.midY - labelNode.frame.height / 2.0)
     }
 }
