@@ -26,7 +26,7 @@ class MainMenuScene: SKScene {
         
         //Add dancing Badger
         let texture = SKTexture(imageNamed: "Macarena 1")
-        let badger = SKSpriteNode(imageNamed: "Macarena 1")
+        let badger = SKSpriteNode(texture: texture)
         badger.position = CGPoint(x: size.width * 0.18, y: size.height*0.40)
         badger.scale(to: CGSize(width: size.width*0.25, height: size.height*0.35))
         badger.zPosition = 0

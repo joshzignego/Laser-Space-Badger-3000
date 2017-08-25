@@ -27,7 +27,7 @@ class ButtonManager {
     
     func makeEnemiesCanStillTakeHitsFromLabel(gameScene: GameScene)->SKLabelNode {
         let enemiesCanStillTakeHitsFromLabel = SKLabelNode(fontNamed: "Fipps-Regular")
-        enemiesCanStillTakeHitsFromLabel.text = String(gameScene.enemiesPassedToDie)
+        enemiesCanStillTakeHitsFromLabel.text = String(gameScene.ENEMIES_PASSED_TO_DIE)
         enemiesCanStillTakeHitsFromLabel.fontSize = 25
         enemiesCanStillTakeHitsFromLabel.fontColor = SKColor.red
         enemiesCanStillTakeHitsFromLabel.position = CGPoint(x: gameScene.size.width*16/100, y: gameScene.size.height*88/100)

@@ -62,14 +62,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var yScaler: CGFloat = 0
     
     //Constants
-    let maxPlatformLength = 15
-    let platformAndEnemySpeed = 100
-    let enemiesPassedToDie = 30
-    let segmentLength = 10 //# of platform segments/ size.width
-    let shootEmemyRate = 5   //0 means max enemies, higher numer means less enemies
-    let ramEnemyRate = 5
-    let powerupRate = 100
-    var jumpVector : CGFloat = 0
+    let MAX_PLATFORM_LENGTH = 15
+    let PLATFORM_AND_ENEMY_SPEED = 100
+    let ENEMIES_PASSED_TO_DIE = 30
+    let SEGMENT_LENGTH = 10 //# of platform segments/ size.width
+    let SHOOT_ENEMY_RATE = 5   //0 means max enemies, higher numer means less enemies
+    let RAM_ENEMY_RATE = 5
+    let POWERUP_RATE = 100
+    var JUMP_VECTOR : CGFloat = 0
+    var SLIDE_VECTOR : CGFloat = 0
     
     //Counters
     var score: Int = 0
@@ -91,28 +92,22 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         physicsWorld.contactDelegate = self
         
         //Initialize globals to proper values
-        enemiesCanStillTakeHitsFrom = enemiesPassedToDie
+        enemiesCanStillTakeHitsFrom = ENEMIES_PASSED_TO_DIE
         xScaler = 0.06 * size.width
         yScaler = 0.12 * size.height
         player.initializePlayer(gameScene: self)
         let body = SKPhysicsBody.init(rectangleOf: CGSize(width: 1, height: 1))
         let ptu = 1.0 / sqrt(body.mass)
         let mass : CGFloat = (player.physicsBody?.mass)!
-        jumpVector = mass * sqrt(2 * -self.physicsWorld.gravity.dy * ((size.height*2/7 + 5) * ptu))
+        JUMP_VECTOR = mass * sqrt(2 * -self.physicsWorld.gravity.dy * ((size.height*2/7 + 5) * ptu))
+        SLIDE_VECTOR =  mass * sqrt(2 * -self.physicsWorld.gravity.dy * ((size.width*0.11) * ptu))
         
-        //Create player running animation, buttons, swipe recognizers, ground
+        //Create player running animation, buttons, swipe recognizers, ground, background
         player.beginRunAnimation()
         makeButtons()
         setUpSwipes()
         makeGround()
-        
-        //Create background
-        let sky = SKSpriteNode(imageNamed: "Sky")
-        
-        sky.position = CGPoint(x: size.width/2, y: size.height/2)
-        sky.scale(to: CGSize(width: size.width, height: size.height))
-        sky.zPosition = 0
-        addChild(sky)
+        addBackground()
         
         //Continuously add platforms & monsters
         run(SKAction.repeatForever(SKAction.sequence([SKAction.run(addPlatform), SKAction.run(addGroundMonster), SKAction.wait(forDuration: 1)  ])))
@@ -168,8 +163,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     func tappedView(_ sender:UITapGestureRecognizer) {
         var point:CGPoint = sender.location(in: self.view)
         point.y = size.height - point.y
-        
         let node = self.atPoint(point)
+        
         if node == pauseButton || node == pauseButton.label {
             pauseButtonHit()
             return
@@ -191,8 +186,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
         
         // Make bullet appropiate size
-        let width: Double = Double(xScaler) / 3 * 2
-        let height: Double = Double(yScaler) / 8
+        let width: CGFloat = xScaler / 3 * 2
+        let height: CGFloat = yScaler / 8
         
         // Set up initial location of projectile
         var bullet = SKShapeNode()
@@ -278,11 +273,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func addGroundMonster() {
-        let randomShootNumber = Double(arc4random_uniform(UInt32(shootEmemyRate)))
-        let randomRamNumber = Double(arc4random_uniform(UInt32(ramEnemyRate)))
-        let randomPowerupNumber = Double(arc4random_uniform(UInt32(powerupRate)))
+        let randomShootNumber = Double(arc4random_uniform(UInt32(SHOOT_ENEMY_RATE)))
+        let randomRamNumber = Double(arc4random_uniform(UInt32(RAM_ENEMY_RATE)))
+        let randomPowerupNumber = Double(arc4random_uniform(UInt32(POWERUP_RATE)))
         let point: CGPoint = CGPoint(x: Double(size.width)*1.1, y: 2)
-        let time = Double(size.width*1.1 + xScaler) / Double(platformAndEnemySpeed)
+        let time = Double(size.width*1.1 + xScaler) / Double(PLATFORM_AND_ENEMY_SPEED)
         let move = SKAction.moveTo(x: -xScaler, duration: TimeInterval(time))
         let moveDone = SKAction.removeFromParent()
         
@@ -320,8 +315,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             return
         }
         let platHeight: Double = Double(platformNumber) / 7 * Double(size.height)
-        let randomLength: Int = Int(arc4random_uniform(UInt32(maxPlatformLength-1))) + 4
-        let platLength: Double = Double(randomLength) * Double(size.width) / Double(segmentLength)
+        let randomLength: Int = Int(arc4random_uniform(UInt32(MAX_PLATFORM_LENGTH-1))) + 4
+        let platLength: Double = Double(randomLength) * Double(size.width) / Double(SEGMENT_LENGTH)
         
         var platform = SKShapeNode()
         let rectangle = CGRect.init(x: 0, y: 0, width: platLength, height: 2)
@@ -333,12 +328,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         addPlatform(platform: platform)
         
         for i in 1...randomLength {
-            let randomShootNumber = Double(arc4random_uniform(UInt32(shootEmemyRate)))
-            let randomRamNumber = Double(arc4random_uniform(UInt32(ramEnemyRate)))
-            let randomPowerupNumber = Double(arc4random_uniform(UInt32(powerupRate)))
-            let point: CGPoint = CGPoint(x: Double(i)*Double(size.width)/Double(segmentLength) - Double(xScaler), y: 2)
+            let randomShootNumber = Double(arc4random_uniform(UInt32(SHOOT_ENEMY_RATE)))
+            let randomRamNumber = Double(arc4random_uniform(UInt32(RAM_ENEMY_RATE)))
+            let randomPowerupNumber = Double(arc4random_uniform(UInt32(POWERUP_RATE)))
+            let point: CGPoint = CGPoint(x: Double(i)*Double(size.width)/Double(SEGMENT_LENGTH) - Double(xScaler), y: 2)
             
-            //For each segment of platform, "1 in shootEmemyRate" chance enemy spawned there
+            //For each segment of platform, "1 in SHOOT_ENEMY_RATE" chance enemy spawned there
             if randomShootNumber == 0 {
                 addShootEnemy(platform: platform, point: point)
             }
@@ -363,8 +358,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
         //Gap between platforms
         doublePlatformPreventerArray[platformNumber - 2] += 1
-        let timeForGap = (3 * Double(size.width) / Double(maxPlatformLength)) / Double(platformAndEnemySpeed)
-        let timeForLastSegmentToEnterScreen = platLength / Double(platformAndEnemySpeed)
+        let timeForGap = (3 * Double(size.width) / Double(MAX_PLATFORM_LENGTH)) / Double(PLATFORM_AND_ENEMY_SPEED)
+        let timeForLastSegmentToEnterScreen = platLength / Double(PLATFORM_AND_ENEMY_SPEED)
         
         
         self.run(SKAction.sequence([SKAction.wait(forDuration: timeForGap + timeForLastSegmentToEnterScreen),
@@ -372,7 +367,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         
         
-        let time = (Double(size.width) + platLength) / Double(platformAndEnemySpeed)
+        let time = (Double(size.width) + platLength) / Double(PLATFORM_AND_ENEMY_SPEED)
         let move = SKAction.moveTo(x: -CGFloat(platLength), duration: TimeInterval(time))
         let moveDone = SKAction.removeFromParent()
         
@@ -476,6 +471,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         enemiesCanStillTakeHitsFromLabel = buttonManager.makeEnemiesCanStillTakeHitsFromLabel(gameScene: self)
     }
     
+    func addBackground() {
+        let sky = SKSpriteNode(imageNamed: "Sky")
+        sky.position = CGPoint(x: size.width/2, y: size.height/2)
+        sky.scale(to: CGSize(width: size.width, height: size.height))
+        sky.zPosition = -1
+        addChild(sky)
+    }
+    
     func mainMenuButtonHit() {
         if areYouSureDisplayed {
             return
@@ -527,8 +530,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             return
         }
         player.beginKickAnimation()
+        let vector = CGVector.init(dx: SLIDE_VECTOR, dy: 0)
         player.setMoving(direction: "right", value: true)
-        let vector = CGVector.init(dx: size.width*0.05, dy: 0)
         player.physicsBody?.applyImpulse(vector)
     }
     
@@ -538,7 +541,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
         player.beginReverseKickAnimation()
         player.setMoving(direction: "left", value: true)
-        let vector = CGVector.init(dx: -size.width*0.05, dy: 0)
+        let vector = CGVector.init(dx: -SLIDE_VECTOR, dy: 0)
         player.physicsBody?.applyImpulse(vector)
     }
  
@@ -548,7 +551,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
         player.setMoving(direction: "up", value: true)
         player.beginJumpAnimation()
-        let vector = CGVector.init(dx: 0, dy: jumpVector)
+        let vector = CGVector.init(dx: 0, dy: JUMP_VECTOR)
         player.physicsBody?.applyImpulse(vector)
     }
     
@@ -584,7 +587,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             }
         }
         
-        let vector = CGVector.init(dx: 0, dy: -jumpVector)
+        let vector = CGVector.init(dx: 0, dy: -JUMP_VECTOR)
         player.physicsBody?.applyImpulse(vector)
         
     }

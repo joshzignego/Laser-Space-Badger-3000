@@ -35,8 +35,8 @@ class GameOverScene: SKScene {
         //Add coffin Badger
         let texture = SKTexture(imageNamed: "Coffin-1")
         let badger = SKSpriteNode(texture: texture)
-        badger.position = CGPoint(x: size.width * 0.125, y: size.height*0.35)
-        badger.scale(to: CGSize(width: size.width*0.25, height: size.height*0.22))
+        badger.position = CGPoint(x: size.width * 0.11, y: size.height*0.35)
+        badger.scale(to: CGSize(width: size.width*0.22, height: size.height*0.22))
         badger.zPosition = 0
         addChild(badger)
         let textureAtlas = SKTextureAtlas(named: "Badger")
@@ -51,7 +51,7 @@ class GameOverScene: SKScene {
         spider.scale(to: CGSize(width: size.width*0.15, height: size.height*0.22))
         spider.zPosition = 0
         addChild(spider)
-        let moveOut = SKAction.moveTo(x: size.width*0.85, duration: TimeInterval(2))
+        let moveOut = SKAction.moveTo(x: size.width*0.90, duration: TimeInterval(2))
         let moveBack = SKAction.moveTo(x: size.width+size.width*0.075, duration: TimeInterval(2))
         spider.run(SKAction.repeatForever(SKAction.sequence([moveOut, SKAction.wait(forDuration: 3.6), moveBack, SKAction.wait(forDuration: 4)])))
 
@@ -103,7 +103,7 @@ class GameOverScene: SKScene {
         
         var scoreMessage = "Score: "
         scoreMessage.append(String(score))
-        createMessage(point: CGPoint(x: size.width*0.50, y: size.height*60/100), message: scoreMessage, size: 40, color: SKColor.yellow)
+        createMessage(point: CGPoint(x: size.width*0.50, y: size.height*58/100), message: scoreMessage, size: 40, color: SKColor.yellow)
         createMessage(point: CGPoint(x: size.width*0.50, y: size.height*75/100), message: "Game Over", size: 60, color: SKColor.red)
         createMessage(point: CGPoint(x: size.width*0.50, y: size.height*10/100), message: "Main Menu", size: 40, color: SKColor.blue)
         createMessage(point: CGPoint(x: size.width*0.50, y: size.height*38/100), message: "Play Again", size: 40, color: SKColor.blue)
@@ -114,7 +114,7 @@ class GameOverScene: SKScene {
         playAgainButton.strokeColor = UIColor.clear
         self.addChild(playAgainButton)
 
-        let path2 = CGRect.init(x: size.width*0.22, y: size.height*3/100, width: size.width*0.56, height: size.height/4)
+        let path2 = CGRect.init(x: size.width*0.322, y: size.height*3/100, width: size.width*0.56, height: size.height/4)
         mainMenuButton = SKShapeNode.init(rect: path2)
         mainMenuButton.zPosition = 5
         mainMenuButton.strokeColor = UIColor.clear
