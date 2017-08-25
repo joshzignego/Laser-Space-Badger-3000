@@ -105,8 +105,8 @@ class GameOverScene: SKScene {
         scoreMessage.append(String(score))
         createMessage(point: CGPoint(x: size.width*0.50, y: size.height*58/100), message: scoreMessage, size: 40, color: SKColor.yellow)
         createMessage(point: CGPoint(x: size.width*0.50, y: size.height*75/100), message: "Game Over", size: 60, color: SKColor.red)
-        createMessage(point: CGPoint(x: size.width*0.50, y: size.height*10/100), message: "Main Menu", size: 40, color: SKColor.blue)
-        createMessage(point: CGPoint(x: size.width*0.50, y: size.height*38/100), message: "Play Again", size: 40, color: SKColor.blue)
+        createMessage(point: CGPoint(x: size.width*0.50, y: size.height*10/100), message: "Main Menu", size: 38, color: SKColor.blue)
+        createMessage(point: CGPoint(x: size.width*0.50, y: size.height*38/100), message: "Play Again", size: 38, color: SKColor.blue)
         
         let path = CGRect.init(x: size.width*0.22, y: size.height*31/100, width: size.width*0.56, height: size.height/4)
         playAgainButton = SKShapeNode.init(rect: path)
